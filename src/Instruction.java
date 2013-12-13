@@ -22,5 +22,33 @@ public class Instruction {
             
             //TO DO: calculating op, des, src1, src2, signedImm variables.
     } 
+    
+    public enum Opcode {
+    	
+		LD("LD"),
+		ST("ST"),
+		JUMP("JUMP"),
+		BEQ("BEQ"),
+		BNE("BNE"),
+		ADD("ADD"),
+		ADDI("ADDI"),
+		SUB("SUB"),
+		SUBI("SUBI"),
+		ADD_S("ADD_S"),
+		SUB_S("SUB_S"),
+		MULT_S("MULT_S"),
+		HALT("HALT");
+
+		private String opcode;
+
+		private Opcode(String opcode) {
+			this.opcode = opcode;
+		}
+
+		@Override
+		public String toString() {
+			return opcode;
+		}
+	}
 
 }
