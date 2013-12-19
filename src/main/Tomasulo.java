@@ -57,6 +57,17 @@ public class Tomasulo {
 		}
 	}
 	
+	public void printRegistersValues() {
+		for (int i = 0; i < 16; i++) {
+			System.out.println("Integer Register " + i + ": " + registers.getIntRegisterValue(i));
+		}
+		
+		for (int i = 0; i < 16; i++) {
+			System.out.println("Float Register " + i + ": " + registers.getFloatRegisterValue(i));
+
+		}
+	}
+	
 	//Getters & Setters:
 	public boolean isFinished() {
 		return status;

@@ -15,7 +15,8 @@ public class Main {
 		// }
 
 		tomasulo.printInstructions();
-
+		tomasulo.printRegistersValues();
+		
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
 		}
