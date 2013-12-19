@@ -2,9 +2,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+import registers.FloatRegister;
+import registers.IntRegister;
+import registers.Registers;
+
 public class Tomasulo {
 	Queue<Instruction> instructions_queue;
 	Memory memory;
+	Registers registers;
 	
 	boolean status;
 	int clock;
@@ -17,7 +22,7 @@ public class Tomasulo {
 		clock = 0;
 		status = Global.UNFINISHED;
 		
-		
+		this.registers = new Registers();
 	}
 	
 	//TODO
