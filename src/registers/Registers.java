@@ -15,6 +15,14 @@ public class Registers {
 		}
 	}
 	
+	public String getIntRegisterTag(int register_number) {
+		return this.int_registers[register_number].getTag();
+	}
+	
+	public String getFloatRegisterTag(int register_number) {
+		return this.float_registers[register_number].getTag();
+	}
+	
 	public int getIntRegisterValue(int register_number) {
 		return this.int_registers[register_number].getValue();
 	}
