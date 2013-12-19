@@ -1,8 +1,8 @@
 package registers;
 
 public class Registers {
-	IntRegister[] int_registers;
-	FloatRegister[] float_registers;
+	private IntRegister[] int_registers;
+	private FloatRegister[] float_registers;
 	
 	public Registers() {
 		int_registers = new IntRegister[16];
@@ -13,6 +13,14 @@ public class Registers {
 		for (int i = 0; i < 16; i++) {
 			float_registers[i] = new FloatRegister((float) i);
 		}
+	}
+	
+	public int getIntRegisterValue(int register_number) {
+		return this.int_registers[register_number].getValue();
+	}
+	
+	public float getFloatRegisterValue(int register_number) {
+		return this.float_registers[register_number].getValue();
 	}
 	
 	public void setIntRegisterValue(int register_number, int value) {
