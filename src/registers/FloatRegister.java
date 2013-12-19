@@ -1,6 +1,5 @@
 package registers;
 
-import registers.Register.Status;
 
 public class FloatRegister extends Register {
 	private float value;
