@@ -1,3 +1,4 @@
+package Main;
 public class Instruction {
 	
 	String name = "";
