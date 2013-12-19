@@ -1,25 +1,63 @@
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 public class Tomasulo {
 	Queue<Instruction> instructions_queue;
-
+	Memory memory;
+	
+	boolean status;
+	int clock;
 	int pc;
 
-	public Tomasulo() {
+	public Tomasulo(Memory mem, Map<String, Integer> configuration) {
 		instructions_queue = new LinkedList<Instruction>();
+		memory = mem;
 		pc = 0;
+		clock = 0;
+		status = Global.UNFINISHED;
+		
+		
 	}
 	
+	//TODO
+	public void issue(){	
+	}
+	
+	//TODO 
+    public void execute(){ 
+    }
+    
+    //TODO
+    public void writeback(){ 
+    } 
+
+	
 	public void printInstructions() {
-		int i = 0;
-		for (Instruction instruction: this.instructions_queue) {
-			System.out.println("Instruction number " + i++ + ":");
-			System.out.println("OPCODE: " + instruction.OPCODE.toString());
-			System.out.println("DST: " + instruction.DST);
-			System.out.println("SRC0: " + instruction.SRC0);
-			System.out.println("SRC1: " + instruction.SRC1);
-			System.out.println("IMM: " + instruction.IMM);
+		int j = 0;
+		Instruction inst;
+		String str;
+		
+		for (int i=0; i<2; i++) {
+			System.out.println("Instruction number " + i + ":");
+			str = memory.getInst (j++);	
+			inst = new Instruction(str);
+		
+			System.out.println("OPCODE: " + inst.OPCODE.toString());
+			System.out.println("DST: " + inst.DST);
+			System.out.println("SRC0: " + inst.SRC0);
+			System.out.println("SRC1: " + inst.SRC1);
+			System.out.println("IMM: " + inst.IMM);
 		}
+	}
+	
+	//Getters & Setters:
+	public boolean isFinished() {
+		return status;
+	}
+
+	
+	//TODO
+	public void step() {
 	}
 }

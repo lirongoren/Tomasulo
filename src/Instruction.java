@@ -1,4 +1,5 @@
 public class Instruction {
+	
 	String name = "";
 
 	int issue = 0;
@@ -17,16 +18,34 @@ public class Instruction {
 
 	public Instruction(String instruction) {
 		name = instruction;
-		int opcode = Integer.parseInt(instruction.substring(0, 4), 2);
-		OPCODE.value = opcode;
-		DST = Integer.parseInt(instruction.substring(4, 8), 2);
-		SRC0 = Integer.parseInt(instruction.substring(8, 12), 2);
-		SRC1 = Integer.parseInt(instruction.substring(12, 16), 2);
-		IMM = Integer.parseInt(instruction.substring(16, 32), 2);
+		OPCODE.value = getOpcodeValue();
+		DST = getDestinationValue();
+		SRC0 = getFirstSourceValue();
+		SRC1 = getSecondSourceValue();
+		IMM = getImmValue();
+	}
+
+	public int getImmValue() {
+		return Integer.parseInt(name.substring(16, 32), 2);
+	}
+	
+	public int getSecondSourceValue() {
+		return Integer.parseInt(name.substring(12, 16), 2);
+	}
+	
+	public int getFirstSourceValue() {
+		return Integer.parseInt(name.substring(8, 12), 2);
+	}
+	
+	public int getDestinationValue() {
+		return Integer.parseInt(name.substring(4, 8), 2);
+	}
+
+	public int getOpcodeValue() {
+		return Integer.parseInt(name.substring(0, 4), 2);
 	}
 
 	public enum Opcode {
-
 		LD(0), ST(1), JUMP(2), BEQ(3), BNE(4), ADD(5), ADDI(6), SUB(7), SUBI(8), ADD_S(
 				9), SUB_S(10), MULT_S(11), HALT(12);
 

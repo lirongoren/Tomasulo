@@ -51,7 +51,7 @@ public class Global {
     public static final int R14 = 14; 
     public static final int R15 = 15; 
         
-    public static final int UNFINISHED = 0;
-    public static final int FINISHED = 1; 
+    public static final boolean UNFINISHED = false;
+    public static final boolean FINISHED = true; 
   	
 }

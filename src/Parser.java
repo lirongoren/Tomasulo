@@ -1,15 +1,14 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 public class Parser {
 
-	Map<String, Integer> configuration;
-	ArrayList<String> memory;
+	private Map<String, Integer> configuration;
+	private Memory memory;
 
 	/**
 	 * This parser will parse the input files & create the output files.
@@ -17,8 +16,8 @@ public class Parser {
 	 * @param txtFiles
 	 */
 	public Parser(String memory_file, String configuration_file) {
-		this.configuration = new HashMap<>();
-		this.memory = new ArrayList<>();
+		this.configuration = new HashMap<String, Integer>();
+		this.memory = new Memory();
 		try {
 			this.parseConfigurationFile(configuration_file);
 		} catch (IOException e) {
@@ -33,8 +32,13 @@ public class Parser {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param configuration_file
+	 * @throws IOException
+	 */
 	@SuppressWarnings("resource")
-	public void parseConfigurationFile(String configuration_file)
+	private void parseConfigurationFile(String configuration_file)
 			throws IOException {
 
 		BufferedReader br = new BufferedReader(
@@ -55,21 +59,58 @@ public class Parser {
 	 * @param memory_file
 	 * @throws IOException
 	 */
-	public void parseMemoryFile(String memory_file) throws IOException {
-
-		@SuppressWarnings("resource")
+	@SuppressWarnings("resource")
+	private void parseMemoryFile(String memory_file) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(memory_file));
 		String str = "";
-		String binAddr;
-
+				
 		while ((str = br.readLine()) != null) {
 			str = str.replaceAll(" ", "").trim();
-			binAddr = new BigInteger(str, 16).toString(2);
-			while (binAddr.length() < 32) {
-				binAddr = "0" + binAddr;
+//			binAddr = new BigInteger(str, 16).toString(2);			
+			while (str.length() < 8) {
+				str = "0" + str;
 			}
-			this.memory.add(binAddr);
+			
+			for (int i=0,k=0; k<4; i=i+2, k++){
+				String s = str.substring(i, i+2);
+				memory.insert(Integer.parseInt(s, 16));
+			}
 		}
 	}
 
+	
+	//TODO
+	public void createMemoryOutputFile(){
+	}
+	
+	//TODO
+	public void createTraceOutputFile(Queue<Instruction> instructions_queue){
+	}
+	
+	//TODO
+	public void createIntRegistersOutputFile(){
+	}
+	
+	//TODO
+	public void createFloatRegistersOutputFile(){
+	}
+	
+	//Getters & Setters
+	public Map<String, Integer> getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(Map<String, Integer> configuration) {
+		this.configuration = configuration;
+	}
+
+	public Memory getMemory() {
+		return memory;
+	}
+
+	public void setMemory(Memory memory) {
+		this.memory = memory;
+	}
+	
+	
 }
