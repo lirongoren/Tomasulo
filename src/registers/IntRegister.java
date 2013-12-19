@@ -1,16 +1,12 @@
 package registers;
 
-public class IntRegister {
-	private String name;
+public class IntRegister extends Register {
 	private int value;
-	
-	IntRegister(String name) {
-		this.name = name;
-		this.setValue(Integer.parseInt(name.substring(1)));
-	}
 
-	public String getName() {
-		return name;
+	public IntRegister(int value) {
+		super();
+		this.value = value;
+		this.name = "R" + value;
 	}
 
 	public int getValue() {
@@ -19,6 +15,7 @@ public class IntRegister {
 
 	public void setValue(int value) {
 		this.value = value;
+		this.status = Status.VALUE;
 	}
 
 }

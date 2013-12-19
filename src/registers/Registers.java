@@ -1,28 +1,33 @@
 package registers;
 
-import java.util.HashMap;
-
 public class Registers {
-	HashMap<String, IntRegister> int_registers = new HashMap<>();
-	HashMap<String, FloatRegister> float_registers = new HashMap<>();
+	IntRegister[] int_registers;
+	FloatRegister[] float_registers;
 	
 	public Registers() {
-		String register_name;
+		int_registers = new IntRegister[16];
 		for (int i = 0; i < 16; i++) {
-			register_name = "R" + i;
-			int_registers.put(register_name, new IntRegister(register_name));
+			int_registers[i] = new IntRegister(i);
 		}
+		float_registers = new FloatRegister[16];
 		for (int i = 0; i < 16; i++) {
-			register_name = "F" + i;
-			float_registers.put(register_name, new FloatRegister(register_name));
+			float_registers[i] = new FloatRegister((float) i);
 		}
 	}
 	
-	public void setIntRegisterValue(String name, int value) {
-		this.int_registers.get(name).setValue(value);
+	public void setIntRegisterValue(int register_number, int value) {
+		this.int_registers[register_number].setValue(value);
 	}
 	
-	public void setFloatRegisterValue(String name, float value) {
-		this.float_registers.get(name).setValue(value);
+	public void setFloatRegisterValue(int register_number, float value) {
+		this.float_registers[register_number].setValue(value);
+	}
+	
+	public void setIntRegisterTag(int register_number, String tag) {
+		this.int_registers[register_number].setTag(tag);
+	}
+	
+	public void setFloatRegisterTag(int register_number, String tag) {
+		this.float_registers[register_number].setTag(tag);
 	}
 }

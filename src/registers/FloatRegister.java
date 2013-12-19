@@ -1,16 +1,14 @@
 package registers;
 
-public class FloatRegister {
-	private String name;
+import registers.Register.Status;
+
+public class FloatRegister extends Register {
 	private float value;
 
-	FloatRegister(String name) {
-		this.name = name;
-		this.setValue(Float.parseFloat(name.substring(1)));
-	}
-
-	public String getName() {
-		return name;
+	public FloatRegister(float value) {
+		super();
+		this.value = value;
+		this.name = "F" + value;
 	}
 
 	public float getValue() {
@@ -19,6 +17,7 @@ public class FloatRegister {
 
 	public void setValue(float value) {
 		this.value = value;
+		this.status = Status.VALUE;
 	}
 
 }
