@@ -51,7 +51,7 @@ public class Tomasulo {
 		this.cdb = new CDB();
 		initializeReservationStations(configuration);
 		initializeBuffers(configuration);
-		initializeUnits(configuration);
+//		initializeUnits(configuration);
 	}
 	
 	// TODO

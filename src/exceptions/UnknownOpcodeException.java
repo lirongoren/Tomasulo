@@ -1,6 +1,6 @@
 package exceptions;
 
-public class BadOpcodeException extends Exception {
+public class UnknownOpcodeException extends Exception {
 
 	/**
 	 * 
@@ -10,7 +10,7 @@ public class BadOpcodeException extends Exception {
 	/**
 	 * Constructs a new BadConnectionException with a default message.
 	 */
-	public BadOpcodeException() {
+	public UnknownOpcodeException() {
 		super("Tomosulu was unable to execute an instruction - unknown opcode!");
 			
 	}
