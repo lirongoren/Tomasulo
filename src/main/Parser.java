@@ -20,13 +20,9 @@ public class Parser {
 		this.configuration = new HashMap<String, Integer>();
 		this.memory = new Memory();
 		try {
-			this.parseConfigurationFile(configuration_file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
 			this.parseMemoryFile(memory_file);
+			this.parseConfigurationFile(configuration_file);
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

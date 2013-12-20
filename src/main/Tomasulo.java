@@ -6,36 +6,29 @@ import java.util.Queue;
 import buffers.LoadBuffer;
 import buffers.StoreBuffer;
 import cdb.CDB;
-import registers.FloatRegister;
-import registers.IntRegister;
 import registers.Registers;
-import units.ALU;
-import units.FPAdd;
-import units.FPMult;
-import units.FPSub;
-import units.Load;
-import units.Store;
+import units.*;
 
 public class Tomasulo {
-	Queue<Instruction> instructions_queue;
-	Memory memory;
-	Registers registers;
+	
+	private Queue<Instruction> instructions_queue;
+	private Memory memory;
+	private Registers registers;
+	
 	
 	boolean status;
 	int clock;
 	int pc;
 	
-	CDB cdb;
+	private CDB cdb;
 	
-	ALU alu_unit;
-	FPAdd FP_add_unit;
-	FPMult FP_mult_unit;
-	FPSub FP_sub_unit;
-	Load load_unit;
-	Store store_unit;
-	
-	LoadBuffer load_buffer;
-	StoreBuffer store_buffer;
+	private integerALU alu_unit;
+	private FPAddSub FP_add_sub_unit;
+	private FPMult FP_mult_unit;
+	private LoadStore load_store_unit;
+
+	private LoadBuffer loadBuffer;
+	private StoreBuffer storeBuffer;
 	
 	// TODO - add fields of reservation stations
 
@@ -46,34 +39,72 @@ public class Tomasulo {
 		clock = 0;
 		status = Global.UNFINISHED;
 		
-		this.registers = new Registers();
-		
-		this.cdb = new CDB();
+		registers = new Registers();
+	
+		cdb = new CDB();
 		initializeReservationStations(configuration);
 		initializeBuffers(configuration);
-//		initializeUnits(configuration);
+		initializeUnits(configuration);
 	}
 	
-	// TODO
+	/**
+	 * 
+	 * @param configuration
+	 */
 	private void initializeBuffers(Map<String, Integer> configuration) {
-		// TODO Auto-generated method stub
-		
+		try{
+			loadBuffer = new LoadBuffer(configuration.get("mem_nr_load_buffers"));
+		}
+		catch (NullPointerException e) {
+			loadBuffer = new LoadBuffer();
+		}
+		try{
+			storeBuffer = new StoreBuffer(configuration.get("mem_nr_store_buffers"));
+		}
+		catch (NullPointerException e) {
+			storeBuffer = new StoreBuffer();
+
+		}
 	}
 
 	// TODO
-	private void initializeReservationStations(
-			Map<String, Integer> configuration) {
+	private void initializeReservationStations(Map<String, Integer> configuration) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/**
+	 * 
+	 * @param configuration
+	 */
 	private void initializeUnits(Map<String, Integer> configuration) {
-		this.alu_unit = new ALU(configuration.get("int_delay"), cdb);
-		this.FP_add_unit = new FPAdd(configuration.get("add_delay"), cdb);
-		this.FP_sub_unit = new FPSub(configuration.get("add_delay"), cdb);
-		this.FP_mult_unit = new FPMult(configuration.get("mul_delay"), cdb);
-		this.load_unit = new Load(configuration.get("mem_delay"), cdb);
-		this.store_unit = new Store(configuration.get("mem_delay"), cdb);
+		try{
+			alu_unit = new integerALU(configuration.get("int_delay"), cdb);
+		}
+		catch (NullPointerException e) {
+			alu_unit = new integerALU(cdb);
+		}
+		
+		try{
+			FP_add_sub_unit = new FPAddSub(configuration.get("add_delay"), cdb);
+		}
+		catch (NullPointerException e) {
+			FP_add_sub_unit = new FPAddSub(cdb);
+		}
+		
+		try{
+			FP_mult_unit = new FPMult(configuration.get("mul_delay"), cdb);
+		}
+		catch (NullPointerException e) {
+			FP_mult_unit = new FPMult(cdb);
+		}
+		
+		try{
+			load_store_unit = new LoadStore(configuration.get("mem_delay"), cdb);
+		}
+		catch (NullPointerException e) {
+			load_store_unit = new LoadStore(cdb);
+		}
 	}
 	
 	//TODO
@@ -88,8 +119,11 @@ public class Tomasulo {
     public void writeback(){ 
     } 
 
-	
+    /**
+	 * This is a test method.
+	 */
 	public void printInstructions() {
+		System.out.println("Input Instructions:\n");
 		int j = 0;
 		Instruction inst;
 		String str;
@@ -104,17 +138,22 @@ public class Tomasulo {
 			System.out.println("SRC0: " + inst.SRC0);
 			System.out.println("SRC1: " + inst.SRC1);
 			System.out.println("IMM: " + inst.IMM);
+			System.out.println();
 		}
 	}
 	
+	/**
+	 * This is a test method.
+	 */
 	public void printRegistersValues() {
+		System.out.println("Integer registers values:\n");
 		for (int i = 0; i < 16; i++) {
 			System.out.println("Integer Register " + i + ": " + registers.getIntRegisterValue(i));
 		}
-		
+		System.out.println();
+		System.out.println("Float registers values:\n");
 		for (int i = 0; i < 16; i++) {
 			System.out.println("Float Register " + i + ": " + registers.getFloatRegisterValue(i));
-
 		}
 	}
 	
