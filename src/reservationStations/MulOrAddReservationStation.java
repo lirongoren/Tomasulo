@@ -5,8 +5,8 @@ public class MulOrAddReservationStation extends ReservastionStation{
 	private float value1;
 	private float value2;
 	
-	public MulOrAddReservationStation(){
-		super();	
+	public MulOrAddReservationStation(int i, String name){
+		super(i, name);	
 	}
 		
 	public float getValue1() {

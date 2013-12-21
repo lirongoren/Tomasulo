@@ -1,12 +1,12 @@
 package reservationStations;
 
-public class ALUReservationStation extends ReservastionStation {
+public class AluReservationStation extends ReservastionStation {
 
 	private int value1;
 	private int value2;
 	
-	public ALUReservationStation(){
-		super();	
+	public AluReservationStation(int i, String name){
+		super(i, name);	
 	}
 		
 	public float getValue1() {

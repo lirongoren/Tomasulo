@@ -1,11 +1,12 @@
 package main;
 import java.io.FileNotFoundException;
 
+import exceptions.MisssingReservationsException;
 import exceptions.UnknownOpcodeException;
 
 public class Main {
 
-	public static void main(String[] args) throws FileNotFoundException, UnknownOpcodeException {
+	public static void main(String[] args) throws FileNotFoundException, UnknownOpcodeException, MisssingReservationsException {
 
 		Parser parser = new Parser(args[0], args[1]);
 		Tomasulo tomasulo = new Tomasulo(parser.getMemory(),

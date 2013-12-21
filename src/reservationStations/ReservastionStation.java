@@ -3,14 +3,20 @@ package reservationStations;
 import main.Global;
 import main.Instruction.Opcode;
 
-public class ReservastionStation {
+public class ReservastionStation implements Comparable<ReservastionStation>{
 	private Opcode opcode;
 	private int busy;
 	private String firstTag;
 	private String secondTag;
+	private String nameOfStation = "";
 	
-	public ReservastionStation() {
+	public ReservastionStation(int i, String name) {
 		busy = Global.IDLE;
+		nameOfStation = name + i;
+	}
+	
+	public String getNameOfStation() {
+		return nameOfStation;
 	}
 	
 	public Opcode getOpcode() {
@@ -43,6 +49,20 @@ public class ReservastionStation {
 
 	public void setSecondTag(String secondTag) {
 		this.secondTag = secondTag;
+	}
+
+	@Override
+	public int compareTo(ReservastionStation o) {
+		String firstRSName = this.getNameOfStation();
+		String secondRSName = o.getNameOfStation();
+		Integer firstAvailable = this.isBusy();
+		Integer secondAvailable = o.isBusy();
+		
+		int result = firstAvailable.compareTo(secondAvailable);
+		if (result == 0){
+			result = firstRSName.compareTo(secondRSName);
+		}
+		return result;
 	}
 	
 }

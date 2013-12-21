@@ -1,16 +1,22 @@
 package main;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import main.Instruction.Opcode;
-import buffers.LoadBuffer;
-import buffers.StoreBuffer;
+import buffers.*;
 import cdb.CDB;
-import exceptions.UnknownOpcodeException;
+import exceptions.*;
 import registers.Registers;
+import reservationStations.AluReservationStation;
+import reservationStations.MulOrAddReservationStation;
+import reservationStations.ReservastionStation;
 import units.*;
 
 public class Tomasulo {
@@ -30,15 +36,19 @@ public class Tomasulo {
 	
 	private integerALU alu_unit;
 	private FPAddSub FP_add_sub_unit;
-	private FPMult FP_mult_unit;
+	private FPMul FP_mult_unit;
 	private LoadStore load_store_unit;
 
 	private LoadBuffer loadBuffer;
 	private StoreBuffer storeBuffer;
 	
 	// TODO - add fields of reservation stations
-
-	public Tomasulo(Memory mem, Map<String, Integer> configuration) {	
+//	Map<String, ReservastionStation> reservationStationsMap;
+	List<ReservastionStation> mulReservationStations;
+	List<ReservastionStation> addReservationStations;
+	List<ReservastionStation> aluReservationStations;
+	
+	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MisssingReservationsException {	
 		instructions_queue = new LinkedList<Instruction>();
 		execList = new ArrayList<Instruction>();     
         wbList = new ArrayList<Instruction>(); 
@@ -117,10 +127,40 @@ public class Tomasulo {
 		}
 	}
 
-	// TODO
-	private void initializeReservationStations(Map<String, Integer> configuration) {
-		// TODO Auto-generated method stub
+	/**
+	 * 
+	 * @param configuration
+	 * @throws MisssingReservationsException
+	 */
+	private void initializeReservationStations(Map<String, Integer> configuration) throws MisssingReservationsException {
+//		reservationStationsMap = new HashMap<String, ReservastionStation>();
+		int numMulRS;
+		int numAddRS;
+		int numAluRS;
+		try{
+			numMulRS = configuration.get("mul_nr_reservation");
+			numAddRS = configuration.get("add_nr_reservation");
+			numAluRS = configuration.get("int_nr_reservation");
+			
+		}catch (NullPointerException e){
+			throw new MisssingReservationsException();
+		}
+		int i;
+		mulReservationStations = new LinkedList<ReservastionStation>();
+		for (i=0 ; i<numMulRS ; i++){
+			mulReservationStations.add(new MulOrAddReservationStation(i, "MUL"));
+		}
+		addReservationStations = new LinkedList<ReservastionStation>();
+		for (i=0 ; i<numAddRS ; i++){
+			addReservationStations.add(new MulOrAddReservationStation(i, "ADD"));
+		}
+		aluReservationStations = new LinkedList<ReservastionStation>();
+		for (i=0 ; i<numAluRS ; i++){
+			aluReservationStations.add(new AluReservationStation(i, "ALU"));
+		}
 		
+		mulReservationStations.get(0).setBusy();
+		Collections.sort(mulReservationStations);
 	}
 
 	/**
@@ -143,10 +183,10 @@ public class Tomasulo {
 		}
 		
 		try{
-			FP_mult_unit = new FPMult(configuration.get("mul_delay"), cdb);
+			FP_mult_unit = new FPMul(configuration.get("mul_delay"), cdb);
 		}
 		catch (NullPointerException e) {
-			FP_mult_unit = new FPMult(cdb);
+			FP_mult_unit = new FPMul(cdb);
 		}
 		
 		try{
@@ -159,7 +199,7 @@ public class Tomasulo {
 	
 	//TODO
 	public void issue(){	
-		Instruction inst = instructions_queue.poll();
+//		Instruction inst = instructions_queue.poll();
 		
 	}
 	
