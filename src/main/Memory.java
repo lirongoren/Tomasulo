@@ -2,12 +2,22 @@ package main;
 
 public class Memory {
 	 
-    private int[] mem = new int[4096];
-    int insertPtr = 0;
+    private int[] mem;
+    private int maxWords = 1024;
+   
+	private int insertPtr = 0;
     
     public Memory(){	
-    	
+    	mem =  new int[maxWords*4];
     }
+    
+    /**
+     * 
+     * @return
+     */
+    public int getMaxWords() {
+		return maxWords;
+	}
     
     /**
      * 

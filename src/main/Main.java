@@ -15,16 +15,13 @@ public class Main {
 		// instruction = new Instruction(instruction_str);
 		// tomasulo.instructions_queue.add(instruction);
 		// }
-
-		tomasulo.printInstructions();
-		tomasulo.printRegistersValues();
-		
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
 		}
-
+		
+		tomasulo.printInstructions();
+		tomasulo.printRegistersValues();
+	
 		parser.createMemoryOutputFile();
-
 	}
-
 }

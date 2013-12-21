@@ -38,7 +38,8 @@ public class Tomasulo {
 	
 	// TODO - add fields of reservation stations
 
-	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws UnknownOpcodeException {	
+	public Tomasulo(Memory mem, Map<String, Integer> configuration) {	
+		instructions_queue = new LinkedList<Instruction>();
 		execList = new ArrayList<Instruction>();     
         wbList = new ArrayList<Instruction>(); 
 		
@@ -50,28 +51,52 @@ public class Tomasulo {
 		registers = new Registers();
 	
 		cdb = new CDB();
-		fetchInstructions();
+		
 		initializeReservationStations(configuration);
 		initializeBuffers(configuration);
 		initializeUnits(configuration);
+		
+	}
+	
+	//TODO
+	public void step() throws UnknownOpcodeException {
+		Instruction inst = fetchInstruction();
+		if (!inst.OPCODE.equals(Opcode.HALT) && pc<memory.getMaxWords()-1){
+			instructions_queue.add(inst);
+		}
+		
+		else if (inst.OPCODE.equals(Opcode.HALT)){
+			System.out.println("Instruction number " + pc + " is an HALT Operation");
+			status = Global.FINISHED;
+		}
+		else if (pc == memory.getMaxWords()-1){
+			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
+			status = Global.FINISHED;
+		}
+		
+		issue();
+		execute();		 
+        writeback(); 
 	}
 	
 	/**
-	 * Insert all existing instruction to the instructions_queue.
-	 * @throws UnknownOpcodeException 
+	 * 
+	 * @return
+	 * @throws UnknownOpcodeException
 	 */
-	private void fetchInstructions() throws UnknownOpcodeException {
-		instructions_queue = new LinkedList<Instruction>();
-		int instNum = 0;
-		Instruction inst = new Instruction(memory.getInst(instNum));
-		
-		while ((!inst.OPCODE.equals(Opcode.HALT)) && instNum<1023){
-			instructions_queue.add(inst);
-			instNum++;
-			inst = new Instruction(memory.getInst(instNum));
-		}		
+	private Instruction fetchInstruction() throws UnknownOpcodeException {
+		Instruction inst = new Instruction(memory.getInst(pc++));
+		clock++;	
+		return inst;
 	}
-
+	
+	/**
+	 * For JUNP instructions.
+	 */
+	private void emptyInstructionsQueue(){
+		instructions_queue.clear();
+	}
+	
 	/**
 	 * 
 	 * @param configuration
@@ -134,7 +159,7 @@ public class Tomasulo {
 	
 	//TODO
 	public void issue(){	
-//		Instruction inst = new Instruction(memory.getInst(pc));
+		Instruction inst = instructions_queue.poll();
 		
 	}
 	
@@ -190,7 +215,5 @@ public class Tomasulo {
 	}
 
 	
-	//TODO
-	public void step() {
-	}
+	
 }

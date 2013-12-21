@@ -8,7 +8,7 @@ public class Instruction {
 
 	int issue = 0;
 	int exec = 0;
-	int writeback = 0;
+	int writeback = -1;
 
 	Opcode OPCODE = Opcode.LD;
 	int DST = 0;
