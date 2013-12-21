@@ -1,5 +1,7 @@
 package main;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -12,10 +14,12 @@ import units.*;
 public class Tomasulo {
 	
 	private Queue<Instruction> instructions_queue;
+	private List<Instruction> execList;
+	private ArrayList<Instruction> wbList;
+	
 	private Memory memory;
 	private Registers registers;
-	
-	
+		
 	boolean status;
 	int clock;
 	int pc;
@@ -34,6 +38,9 @@ public class Tomasulo {
 
 	public Tomasulo(Memory mem, Map<String, Integer> configuration) {
 		instructions_queue = new LinkedList<Instruction>();
+		execList = new ArrayList<Instruction>();     
+        wbList = new ArrayList<Instruction>(); 
+		
 		memory = mem;
 		pc = 0;
 		clock = 0;
