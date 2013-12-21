@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import main.Instruction.Opcode;
 import buffers.LoadBuffer;
 import buffers.StoreBuffer;
 import cdb.CDB;
+import exceptions.UnknownOpcodeException;
 import registers.Registers;
 import units.*;
 
@@ -15,7 +17,7 @@ public class Tomasulo {
 	
 	private Queue<Instruction> instructions_queue;
 	private List<Instruction> execList;
-	private ArrayList<Instruction> wbList;
+	private List<Instruction> wbList;
 	
 	private Memory memory;
 	private Registers registers;
@@ -36,8 +38,7 @@ public class Tomasulo {
 	
 	// TODO - add fields of reservation stations
 
-	public Tomasulo(Memory mem, Map<String, Integer> configuration) {
-		instructions_queue = new LinkedList<Instruction>();
+	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws UnknownOpcodeException {	
 		execList = new ArrayList<Instruction>();     
         wbList = new ArrayList<Instruction>(); 
 		
@@ -49,11 +50,28 @@ public class Tomasulo {
 		registers = new Registers();
 	
 		cdb = new CDB();
+		fetchInstructions();
 		initializeReservationStations(configuration);
 		initializeBuffers(configuration);
 		initializeUnits(configuration);
 	}
 	
+	/**
+	 * Insert all existing instruction to the instructions_queue.
+	 * @throws UnknownOpcodeException 
+	 */
+	private void fetchInstructions() throws UnknownOpcodeException {
+		instructions_queue = new LinkedList<Instruction>();
+		int instNum = 0;
+		Instruction inst = new Instruction(memory.getInst(instNum));
+		
+		while ((!inst.OPCODE.equals(Opcode.HALT)) && instNum<1023){
+			instructions_queue.add(inst);
+			instNum++;
+			inst = new Instruction(memory.getInst(instNum));
+		}		
+	}
+
 	/**
 	 * 
 	 * @param configuration
@@ -116,6 +134,8 @@ public class Tomasulo {
 	
 	//TODO
 	public void issue(){	
+//		Instruction inst = new Instruction(memory.getInst(pc));
+		
 	}
 	
 	//TODO 
@@ -128,19 +148,19 @@ public class Tomasulo {
 
     /**
 	 * This is a test method.
+     * @throws UnknownOpcodeException 
 	 */
-	public void printInstructions() {
+	public void printInstructions() throws UnknownOpcodeException {
 		System.out.println("Input Instructions:\n");
 		int j = 0;
-		Instruction inst;
 		String str;
 		
-		for (int i=0; i<2; i++) {
-			System.out.println("Instruction number " + i + ":");
+		for (Instruction inst : instructions_queue) {
+			System.out.println("Instruction number " + j + ":");
 			str = memory.getInst (j++);	
 			inst = new Instruction(str);
 		
-			System.out.println("OPCODE: " + inst.OPCODE.toString());
+			System.out.println("OPCODE: " + inst.OPCODE);
 			System.out.println("DST: " + inst.DST);
 			System.out.println("SRC0: " + inst.SRC0);
 			System.out.println("SRC1: " + inst.SRC1);

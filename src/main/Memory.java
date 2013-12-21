@@ -2,7 +2,7 @@ package main;
 
 public class Memory {
 	 
-    private Integer[] mem = new Integer[4096];
+    private int[] mem = new int[4096];
     int insertPtr = 0;
     
     public Memory(){	

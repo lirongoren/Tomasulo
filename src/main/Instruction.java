@@ -1,4 +1,7 @@
 package main;
+
+import exceptions.UnknownOpcodeException;
+
 public class Instruction {
 	
 	String name = "";
@@ -17,17 +20,58 @@ public class Instruction {
 
 	float result = 0f;
 
-	public Instruction(String instruction) {
+	public Instruction(String instruction) throws UnknownOpcodeException {
 		name = instruction;
-		OPCODE.value = getOpcodeValue();
+		OPCODE = createOpcode(getOpcodeValue());
 		DST = getDestinationValue();
 		SRC0 = getFirstSourceValue();
 		SRC1 = getSecondSourceValue();
 		IMM = getImmValue();
 	}
 
+	/**
+	 * 
+	 * @param opcode
+	 * @return
+	 * @throws UnknownOpcodeException
+	 */
+	private Opcode createOpcode(int opcode) throws UnknownOpcodeException {
+		switch (opcode) {
+		case 0:
+			return Opcode.LD;
+		case 1:
+			return Opcode.ST;
+		case 2:
+			return Opcode.JUMP;
+		case 3:
+			return Opcode.BEQ;
+		case 4:
+			return Opcode.BNE;
+		case 5:
+			return Opcode.ADD;
+		case 6:
+			return Opcode.ADDI;
+		case 7:
+			return Opcode.SUB;
+		case 8:
+			return Opcode.SUBI;
+		case 9:
+			return Opcode.ADD_S;
+		case 10:
+			return Opcode.SUB_S;
+		case 11:
+			return Opcode.MULT_S;
+		case 12:
+			return Opcode.HALT;
+		default:
+			throw new UnknownOpcodeException();
+		}
+	}
+
 	public int getImmValue() {
-		return Integer.parseInt(name.substring(16, 32), 2);
+		int sign = Integer.parseInt(name.substring(16, 17), 2);
+		int num = Integer.parseInt(name.substring(17, 32), 2);
+		return (-1 * sign * ((int) Math.pow(2, 15) -1)) + num;
 	}
 	
 	public int getSecondSourceValue() {
