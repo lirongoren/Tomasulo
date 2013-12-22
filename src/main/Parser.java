@@ -78,7 +78,7 @@ public class Parser {
 	 * @throws IOException
 	 */
 	public void createMemoryOutputFile() throws IOException{
-      File file = new File("C://Users//Tal//Documents//GitHub//Tomasulo//memout.txt");
+      File file = new File("memout.txt");
       BufferedWriter output = new BufferedWriter(new FileWriter(file));
       for (int i=0; i<1024; i++){
     	  String str =   Integer.toHexString(memory.load(i));
