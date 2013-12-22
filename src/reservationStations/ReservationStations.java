@@ -8,22 +8,22 @@ public class ReservationStations {
 
 //	Map<String, ReservastionStation> reservationStationsMap;
 	
-	private List<ReservastionStation> mulReservationStations;
-	private List<ReservastionStation> addReservationStations;
-	private List<ReservastionStation> aluReservationStations;
+	private List<MulOrAddReservationStation> mulReservationStations;
+	private List<MulOrAddReservationStation> addReservationStations;
+	private List<AluReservationStation> aluReservationStations;
 	
 	
 	public ReservationStations(int numMulRS, int numAddRS, int numAluRS){	
 		int i;
-		mulReservationStations = new ArrayList<ReservastionStation>();
+		mulReservationStations = new ArrayList<MulOrAddReservationStation>();
 		for (i=0 ; i<numMulRS ; i++){
 			mulReservationStations.add(new MulOrAddReservationStation(i, "MUL"));
 		}
-		addReservationStations = new ArrayList<ReservastionStation>();
+		addReservationStations = new ArrayList<MulOrAddReservationStation>();
 		for (i=0 ; i<numAddRS ; i++){
 			addReservationStations.add(new MulOrAddReservationStation(i, "ADD"));
 		}
-		aluReservationStations = new ArrayList<ReservastionStation>();
+		aluReservationStations = new ArrayList<AluReservationStation>();
 		for (i=0 ; i<numAluRS ; i++){
 			aluReservationStations.add(new AluReservationStation(i, "ALU"));
 		}

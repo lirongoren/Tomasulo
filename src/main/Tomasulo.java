@@ -12,6 +12,7 @@ import units.FPAddSub;
 import units.FPMul;
 import units.LoadStore;
 import units.integerALU;
+import buffers.Buffers;
 import buffers.LoadBuffer;
 import buffers.StoreBuffer;
 import cdb.CDB;
@@ -28,7 +29,8 @@ public class Tomasulo {
 	private Memory memory;
 	private Registers registers;
 	private ReservationStations reservationStations;
-		
+	private Buffers buffers;
+	
 	boolean status;
 	int clock;
 	int pc;
@@ -39,10 +41,6 @@ public class Tomasulo {
 	private FPAddSub FP_add_sub_unit;
 	private FPMul FP_mult_unit;
 	private LoadStore load_store_unit;
-
-	private LoadBuffer loadBuffer;
-	private StoreBuffer storeBuffer;
-		
 	
 	/**
 	 * 
@@ -119,13 +117,16 @@ public class Tomasulo {
 	 * @throws MissingLoadStoreBuffers 
 	 */
 	private void initializeBuffers(Map<String, Integer> configuration) throws MissingLoadStoreBuffers {
+		int numLoadBuffers;
+		int numStoreBuffers;
 		try{
-			loadBuffer = new LoadBuffer(configuration.get("mem_nr_load_buffers"));
-			storeBuffer = new StoreBuffer(configuration.get("mem_nr_store_buffers"));
+			numLoadBuffers = configuration.get("mem_nr_load_buffers");
+			numStoreBuffers = configuration.get("mem_nr_store_buffers");
 		}
 		catch (NullPointerException e) {
 			throw new MissingLoadStoreBuffers();
 		}
+		buffers = new Buffers(numStoreBuffers, numLoadBuffers);
 	}
 
 	/**
@@ -206,7 +207,7 @@ public class Tomasulo {
 			
 		}
 		
-		
+		clock++;
 	}
 	
 	//TODO 

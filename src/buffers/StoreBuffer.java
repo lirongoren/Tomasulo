@@ -1,13 +1,15 @@
 package buffers;
 
-public class StoreBuffer {
+import main.Instruction;
 
-	public StoreBuffer(int storeBuffers) {
-		// TODO Auto-generated constructor stub
+public class StoreBuffer extends LoadStoreBuffer{
+
+	private Instruction inst;
+	
+	public StoreBuffer(int i, String name) {	
+		super(i, name);
 	}
 	
-	public StoreBuffer() {
-		this(0);
-	}
+	
 
 }
