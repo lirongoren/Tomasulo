@@ -1,23 +1,24 @@
 package main;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import main.Instruction.Opcode;
-import buffers.*;
-import cdb.CDB;
-import exceptions.*;
 import registers.Registers;
 import reservationStations.AluReservationStation;
 import reservationStations.MulOrAddReservationStation;
 import reservationStations.ReservastionStation;
-import units.*;
+import units.FPAddSub;
+import units.FPMul;
+import units.LoadStore;
+import units.integerALU;
+import buffers.LoadBuffer;
+import buffers.StoreBuffer;
+import cdb.CDB;
+import exceptions.MisssingReservationsException;
+import exceptions.UnknownOpcodeException;
 
 public class Tomasulo {
 	
@@ -42,7 +43,6 @@ public class Tomasulo {
 	private LoadBuffer loadBuffer;
 	private StoreBuffer storeBuffer;
 	
-	// TODO - add fields of reservation stations
 //	Map<String, ReservastionStation> reservationStationsMap;
 	List<ReservastionStation> mulReservationStations;
 	List<ReservastionStation> addReservationStations;
@@ -65,7 +65,6 @@ public class Tomasulo {
 		initializeReservationStations(configuration);
 		initializeBuffers(configuration);
 		initializeUnits(configuration);
-		
 	}
 	
 	//TODO
@@ -73,24 +72,25 @@ public class Tomasulo {
 		Instruction inst = fetchInstruction();
 		if (!inst.OPCODE.equals(Opcode.HALT) && pc<memory.getMaxWords()-1){
 			instructions_queue.add(inst);
+			
+			issue();
+			execute();		 
+	        writeback(); 
 		}
 		
 		else if (inst.OPCODE.equals(Opcode.HALT)){
 			System.out.println("Instruction number " + pc + " is an HALT Operation");
 			status = Global.FINISHED;
 		}
+		
 		else if (pc == memory.getMaxWords()-1){
 			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 			status = Global.FINISHED;
 		}
-		
-		issue();
-		execute();		 
-        writeback(); 
 	}
 	
 	/**
-	 * 
+	 * Fetching an instruction from the memory to the Instruction Queue takes one clock cycle.
 	 * @return
 	 * @throws UnknownOpcodeException
 	 */
@@ -101,7 +101,7 @@ public class Tomasulo {
 	}
 	
 	/**
-	 * For JUNP instructions.
+	 * For JUMP instructions.
 	 */
 	private void emptyInstructionsQueue(){
 		instructions_queue.clear();
@@ -123,7 +123,6 @@ public class Tomasulo {
 		}
 		catch (NullPointerException e) {
 			storeBuffer = new StoreBuffer();
-
 		}
 	}
 
@@ -146,21 +145,18 @@ public class Tomasulo {
 			throw new MisssingReservationsException();
 		}
 		int i;
-		mulReservationStations = new LinkedList<ReservastionStation>();
+		mulReservationStations = new ArrayList<ReservastionStation>();
 		for (i=0 ; i<numMulRS ; i++){
 			mulReservationStations.add(new MulOrAddReservationStation(i, "MUL"));
 		}
-		addReservationStations = new LinkedList<ReservastionStation>();
+		addReservationStations = new ArrayList<ReservastionStation>();
 		for (i=0 ; i<numAddRS ; i++){
 			addReservationStations.add(new MulOrAddReservationStation(i, "ADD"));
 		}
-		aluReservationStations = new LinkedList<ReservastionStation>();
+		aluReservationStations = new ArrayList<ReservastionStation>();
 		for (i=0 ; i<numAluRS ; i++){
 			aluReservationStations.add(new AluReservationStation(i, "ALU"));
 		}
-		
-		mulReservationStations.get(0).setBusy();
-		Collections.sort(mulReservationStations);
 	}
 
 	/**
@@ -200,6 +196,7 @@ public class Tomasulo {
 	//TODO
 	public void issue(){	
 //		Instruction inst = instructions_queue.poll();
+		
 		
 	}
 	
