@@ -1,6 +1,5 @@
 package main;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,9 +7,6 @@ import java.util.Queue;
 
 import main.Instruction.Opcode;
 import registers.Registers;
-import reservationStations.AluReservationStation;
-import reservationStations.MulOrAddReservationStation;
-import reservationStations.ReservastionStation;
 import reservationStations.ReservationStations;
 import units.FPAddSub;
 import units.FPMul;
@@ -19,6 +15,7 @@ import units.integerALU;
 import buffers.LoadBuffer;
 import buffers.StoreBuffer;
 import cdb.CDB;
+import exceptions.MissingLoadStoreBuffers;
 import exceptions.MisssingReservationsException;
 import exceptions.UnknownOpcodeException;
 
@@ -30,6 +27,7 @@ public class Tomasulo {
 	
 	private Memory memory;
 	private Registers registers;
+	private ReservationStations reservationStations;
 		
 	boolean status;
 	int clock;
@@ -45,15 +43,15 @@ public class Tomasulo {
 	private LoadBuffer loadBuffer;
 	private StoreBuffer storeBuffer;
 		
-	private ReservationStations reservationStations;
 	
 	/**
 	 * 
 	 * @param mem
 	 * @param configuration
 	 * @throws MisssingReservationsException
+	 * @throws MissingLoadStoreBuffers 
 	 */
-	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MisssingReservationsException {	
+	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MisssingReservationsException, MissingLoadStoreBuffers {	
 		instructions_queue = new LinkedList<Instruction>();
 		execList = new ArrayList<Instruction>();     
         wbList = new ArrayList<Instruction>(); 
@@ -118,19 +116,15 @@ public class Tomasulo {
 	/**
 	 * 
 	 * @param configuration
+	 * @throws MissingLoadStoreBuffers 
 	 */
-	private void initializeBuffers(Map<String, Integer> configuration) {
+	private void initializeBuffers(Map<String, Integer> configuration) throws MissingLoadStoreBuffers {
 		try{
 			loadBuffer = new LoadBuffer(configuration.get("mem_nr_load_buffers"));
-		}
-		catch (NullPointerException e) {
-			loadBuffer = new LoadBuffer();
-		}
-		try{
 			storeBuffer = new StoreBuffer(configuration.get("mem_nr_store_buffers"));
 		}
 		catch (NullPointerException e) {
-			storeBuffer = new StoreBuffer();
+			throw new MissingLoadStoreBuffers();
 		}
 	}
 
