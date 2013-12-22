@@ -1,6 +1,6 @@
 package exceptions;
 
-public class MissingLoadStoreBuffers extends Exception {
+public class MissingNumberOfLoadStoreBuffersException extends Exception {
 	
 	/**
 	 * 
@@ -10,7 +10,7 @@ public class MissingLoadStoreBuffers extends Exception {
 	/**
 	 * Constructs a new MissingLoadStoreBuffers with a default message.
 	 */
-	public MissingLoadStoreBuffers() {
+	public MissingNumberOfLoadStoreBuffersException() {
 		super("Missing number of load / store buffers in the configuration input file!");
 			
 	}

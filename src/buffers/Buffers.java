@@ -21,7 +21,7 @@ public class Buffers {
 			loadBuffers.add(new LoadBuffer(i, "LOAD"));
 		}
 	}
-	
+		
 	public boolean isThereFreeStoreBuffer(){
 		Collections.sort(storeBuffers);
 		if (storeBuffers.get(0).isBusy()==1){

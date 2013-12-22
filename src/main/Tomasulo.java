@@ -8,17 +8,10 @@ import java.util.Queue;
 import main.Instruction.Opcode;
 import registers.Registers;
 import reservationStations.ReservationStations;
-import units.FPAddSub;
-import units.FPMul;
-import units.LoadStore;
-import units.integerALU;
-import buffers.Buffers;
-import buffers.LoadBuffer;
-import buffers.StoreBuffer;
+import units.*;
+import buffers.*;
 import cdb.CDB;
-import exceptions.MissingLoadStoreBuffers;
-import exceptions.MisssingReservationsException;
-import exceptions.UnknownOpcodeException;
+import exceptions.*;
 
 public class Tomasulo {
 	
@@ -31,9 +24,9 @@ public class Tomasulo {
 	private ReservationStations reservationStations;
 	private Buffers buffers;
 	
-	boolean status;
-	int clock;
-	int pc;
+	private boolean status;
+	private int clock;
+	private int pc;
 	
 	private CDB cdb;
 	
@@ -46,10 +39,13 @@ public class Tomasulo {
 	 * 
 	 * @param mem
 	 * @param configuration
+	 * @throws MisssingNumberOfReservationStationsException 
+	 * @throws MissingNumberOfLoadStoreBuffers 
 	 * @throws MisssingReservationsException
 	 * @throws MissingLoadStoreBuffers 
 	 */
-	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MisssingReservationsException, MissingLoadStoreBuffers {	
+	public Tomasulo(Memory mem, Map<String, Integer> configuration)
+			throws MissingNumberOfReservationStationsException, MissingNumberOfLoadStoreBuffersException{	
 		instructions_queue = new LinkedList<Instruction>();
 		execList = new ArrayList<Instruction>();     
         wbList = new ArrayList<Instruction>(); 
@@ -116,7 +112,8 @@ public class Tomasulo {
 	 * @param configuration
 	 * @throws MissingLoadStoreBuffers 
 	 */
-	private void initializeBuffers(Map<String, Integer> configuration) throws MissingLoadStoreBuffers {
+	private void initializeBuffers(Map<String, Integer> configuration)
+			throws MissingNumberOfLoadStoreBuffersException {
 		int numLoadBuffers;
 		int numStoreBuffers;
 		try{
@@ -124,7 +121,10 @@ public class Tomasulo {
 			numStoreBuffers = configuration.get("mem_nr_store_buffers");
 		}
 		catch (NullPointerException e) {
-			throw new MissingLoadStoreBuffers();
+			throw new MissingNumberOfLoadStoreBuffersException();
+		}
+		if (numLoadBuffers==0 || numStoreBuffers==0){
+			throw new MissingNumberOfLoadStoreBuffersException();
 		}
 		buffers = new Buffers(numStoreBuffers, numLoadBuffers);
 	}
@@ -134,7 +134,8 @@ public class Tomasulo {
 	 * @param configuration
 	 * @throws MisssingReservationsException
 	 */
-	private void initializeReservationStations(Map<String, Integer> configuration) throws MisssingReservationsException {
+	private void initializeReservationStations(Map<String, Integer> configuration)
+			throws MissingNumberOfReservationStationsException {
 //		reservationStationsMap = new HashMap<String, ReservastionStation>();
 		int numMulRS;
 		int numAddRS;
@@ -145,13 +146,16 @@ public class Tomasulo {
 			numAluRS = configuration.get("int_nr_reservation");
 			
 		}catch (NullPointerException e){
-			throw new MisssingReservationsException();
+			throw new MissingNumberOfReservationStationsException();
+		}
+		if(numMulRS==0 || numAddRS==0 || numAluRS==0){
+			throw new MissingNumberOfReservationStationsException();
 		}
 		reservationStations = new ReservationStations(numMulRS, numAddRS, numAluRS);
 	}
 
 	/**
-	 * 
+	 * Here we can keep executing with zero values in configuration file.
 	 * @param configuration
 	 */
 	private void initializeUnits(Map<String, Integer> configuration) {

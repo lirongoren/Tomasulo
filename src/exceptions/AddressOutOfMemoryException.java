@@ -1,6 +1,6 @@
 package exceptions;
 
-public class AddressOutOfMemory extends Exception{
+public class AddressOutOfMemoryException extends Exception{
 
 	/**
 	 * 
@@ -10,7 +10,7 @@ public class AddressOutOfMemory extends Exception{
 	/**
 	 * Constructs a new AddressOutOfMemory with a default message.
 	 */
-	public AddressOutOfMemory() {
+	public AddressOutOfMemoryException() {
 		super("Address for load / store operation is out of memory!");
 			
 	}

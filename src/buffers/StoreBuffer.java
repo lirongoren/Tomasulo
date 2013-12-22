@@ -10,6 +10,13 @@ public class StoreBuffer extends LoadStoreBuffer{
 		super(i, name);
 	}
 	
-	
+	public Instruction getInst() {
+		return inst;
+	}
+
+	public void setInst(Instruction inst) {
+		this.inst = inst;
+	}
+
 
 }

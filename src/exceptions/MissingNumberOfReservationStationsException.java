@@ -1,6 +1,6 @@
 package exceptions;
 
-public class MisssingReservationsException extends Exception {
+public class MissingNumberOfReservationStationsException extends Exception {
 	
 	/**
 	 * 
@@ -10,7 +10,7 @@ public class MisssingReservationsException extends Exception {
 	/**
 	 * Constructs a new MisssingReservationsException with a default message.
 	 */
-	public MisssingReservationsException() {
+	public MissingNumberOfReservationStationsException() {
 		super("Missing value for reservation stations in the configuration input file!");
 			
 	}
