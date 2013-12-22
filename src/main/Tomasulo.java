@@ -78,7 +78,7 @@ public class Tomasulo {
 		Instruction inst = fetchInstruction();
 		if (!inst.OPCODE.equals(Opcode.HALT) && pc<memory.getMaxWords()-1){
 			instructions_queue.add(inst);
-			
+									
 			issue();
 			execute();		 
 	        writeback(); 
@@ -187,6 +187,24 @@ public class Tomasulo {
 	public void issue(){	
 		Instruction inst = instructions_queue.peek();
 		
+		if (inst.OPCODE.equals(Opcode.LD) || inst.OPCODE.equals(Opcode.ST)){
+						
+		}
+		else if (inst.OPCODE.equals(Opcode.ADD_S) || inst.OPCODE.equals(Opcode.SUB_S)){
+			
+		}
+		else if (inst.OPCODE.equals(Opcode.MULT_S)){
+			
+		}
+		else if (inst.OPCODE.equals(Opcode.JUMP)){
+			
+		}
+		else if (inst.OPCODE.equals(Opcode.BNE) || inst.OPCODE.equals(Opcode.BEQ)){
+			
+		}
+		else {
+			
+		}
 		
 		
 	}
