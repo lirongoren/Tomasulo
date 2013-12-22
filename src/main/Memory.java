@@ -8,7 +8,7 @@ public class Memory {
 	private int insertPtr = 0;
     
     public Memory(){	
-    	mem =  new int[maxWords*4];
+    	mem =  new int[maxWords];
     }
     
     /**
@@ -51,18 +51,10 @@ public class Memory {
      * @return
      */
 	public String getInst(int instNum) {
-		String result = "";
-		int firstPtr = instNum * 4;
-		
-		for (int k=0 ; k<4; k++){
-			String intString = Integer.toString(load(firstPtr++), 2);
-			while (intString.length()<8){
-				intString = "0" + intString;
-			}	
-			result = result + intString;
+		String result = Integer.toBinaryString(mem[instNum]);
+		while (result.length()<32){
+			result = 0 + result;
 		}
 		return result;
-		
-	}
-	
+	}	
 }

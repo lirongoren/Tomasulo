@@ -65,19 +65,14 @@ public class Parser {
 		String str = "";
 				
 		while ((str = br.readLine()) != null) {
-			str = str.replaceAll(" ", "").trim();
-//			binAddr = new BigInteger(str, 16).toString(2);			
+			str = str.replaceAll(" ", "").trim();			
 			while (str.length() < 8) {
 				str = "0" + str;
 			}
-			
-			for (int i=0,k=0; k<4; i=i+2, k++){
-				String s = str.substring(i, i+2);
-				memory.insert(Integer.parseInt(s, 16));
-			}
+			memory.insert((int) Long.parseLong(str,16));
 		}
 	}
-
+	
 	/**
 	 * 
 	 * @throws IOException
@@ -85,16 +80,12 @@ public class Parser {
 	public void createMemoryOutputFile() throws IOException{
       File file = new File("C://Users//Tal//Documents//GitHub//Tomasulo//memout.txt");
       BufferedWriter output = new BufferedWriter(new FileWriter(file));
-      for (int i=0; i<1024; ){
-    	  String hexLine = "";
-    	  for (int j=0; j<4; j++){
-    		  String append = Integer.toHexString(memory.load(i++));
-    		  if (append.length()==1){
-    			  append = "0" + append;
-    		  }
-    		  hexLine = hexLine + append;
+      for (int i=0; i<1024; i++){
+    	  String str =   Integer.toHexString(memory.load(i));
+    	  while (str.length() < 8) {
+    		  str = "0" + str;
     	  }
-    	  output.write(hexLine);
+    	  output.write(str);
           output.newLine();
       }
       output.close();  
