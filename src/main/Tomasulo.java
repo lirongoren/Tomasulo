@@ -11,6 +11,7 @@ import registers.Registers;
 import reservationStations.AluReservationStation;
 import reservationStations.MulOrAddReservationStation;
 import reservationStations.ReservastionStation;
+import reservationStations.ReservationStations;
 import units.FPAddSub;
 import units.FPMul;
 import units.LoadStore;
@@ -43,12 +44,15 @@ public class Tomasulo {
 
 	private LoadBuffer loadBuffer;
 	private StoreBuffer storeBuffer;
+		
+	private ReservationStations reservationStations;
 	
-//	Map<String, ReservastionStation> reservationStationsMap;
-	List<ReservastionStation> mulReservationStations;
-	List<ReservastionStation> addReservationStations;
-	List<ReservastionStation> aluReservationStations;
-	
+	/**
+	 * 
+	 * @param mem
+	 * @param configuration
+	 * @throws MisssingReservationsException
+	 */
 	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MisssingReservationsException {	
 		instructions_queue = new LinkedList<Instruction>();
 		execList = new ArrayList<Instruction>();     
@@ -68,7 +72,10 @@ public class Tomasulo {
 		initializeUnits(configuration);
 	}
 	
-	//TODO
+	/**
+	 * 
+	 * @throws UnknownOpcodeException
+	 */
 	public void step() throws UnknownOpcodeException {
 		Instruction inst = fetchInstruction();
 		if (!inst.OPCODE.equals(Opcode.HALT) && pc<memory.getMaxWords()-1){
@@ -145,19 +152,7 @@ public class Tomasulo {
 		}catch (NullPointerException e){
 			throw new MisssingReservationsException();
 		}
-		int i;
-		mulReservationStations = new ArrayList<ReservastionStation>();
-		for (i=0 ; i<numMulRS ; i++){
-			mulReservationStations.add(new MulOrAddReservationStation(i, "MUL"));
-		}
-		addReservationStations = new ArrayList<ReservastionStation>();
-		for (i=0 ; i<numAddRS ; i++){
-			addReservationStations.add(new MulOrAddReservationStation(i, "ADD"));
-		}
-		aluReservationStations = new ArrayList<ReservastionStation>();
-		for (i=0 ; i<numAluRS ; i++){
-			aluReservationStations.add(new AluReservationStation(i, "ALU"));
-		}
+		reservationStations = new ReservationStations(numMulRS, numAddRS, numAluRS);
 	}
 
 	/**
