@@ -1,5 +1,6 @@
 package main;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +196,8 @@ public class Tomasulo {
 	
 	//TODO
 	public void issue(){	
-//		Instruction inst = instructions_queue.poll();
+		Instruction inst = instructions_queue.peek();
+		
 		
 		
 	}

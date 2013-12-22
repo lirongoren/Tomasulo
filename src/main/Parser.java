@@ -1,6 +1,9 @@
 package main;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,9 +78,26 @@ public class Parser {
 		}
 	}
 
-	
-	//TODO
-	public void createMemoryOutputFile(){
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	public void createMemoryOutputFile() throws IOException{
+      File file = new File("C://Users//Tal//Documents//GitHub//Tomasulo//memout.txt");
+      BufferedWriter output = new BufferedWriter(new FileWriter(file));
+      for (int i=0; i<1024; ){
+    	  String hexLine = "";
+    	  for (int j=0; j<4; j++){
+    		  String append = Integer.toHexString(memory.load(i++));
+    		  if (append.length()==1){
+    			  append = "0" + append;
+    		  }
+    		  hexLine = hexLine + append;
+    	  }
+    	  output.write(hexLine);
+          output.newLine();
+      }
+      output.close();  
 	}
 	
 	//TODO
