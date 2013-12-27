@@ -31,7 +31,7 @@ public class ReservationStations {
 	
 	public boolean isThereFreeAluRS(){
 		Collections.sort(aluReservationStations);
-		if (aluReservationStations.get(0).isBusy()==1){
+		if (aluReservationStations.get(0).isBusy()){
 			return false;
 		}
 		return true;
@@ -39,7 +39,7 @@ public class ReservationStations {
 	
 	public boolean isThereFreeMulRS(){
 		Collections.sort(mulReservationStations);
-		if (mulReservationStations.get(0).isBusy()==1){
+		if (mulReservationStations.get(0).isBusy()){
 			return false;
 		}
 		return true;
@@ -47,9 +47,36 @@ public class ReservationStations {
 	
 	public boolean isThereFreeAddRS(){
 		Collections.sort(addReservationStations);
-		if (addReservationStations.get(0).isBusy()==1){
+		if (addReservationStations.get(0).isBusy()){
 			return false;
 		}
 		return true;
+	}
+	
+	public MulOrAddReservationStation getFreeAddReservationStation() {
+		for (MulOrAddReservationStation reservationStation: addReservationStations) {
+			if (!reservationStation.isBusy()) {
+				return reservationStation;
+			}
+		}
+		return null;
+	}
+	
+	public MulOrAddReservationStation getFreeMulReservationStation() {
+		for (MulOrAddReservationStation reservationStation: mulReservationStations) {
+			if (!reservationStation.isBusy()) {
+				return reservationStation;
+			}
+		}
+		return null;
+	}
+	
+	public AluReservationStation getFreeAluReservationStation() {
+		for (AluReservationStation reservationStation: aluReservationStations) {
+			if (!reservationStation.isBusy()) {
+				return reservationStation;
+			}
+		}
+		return null;
 	}
 }

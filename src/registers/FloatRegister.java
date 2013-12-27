@@ -2,7 +2,7 @@ package registers;
 
 
 public class FloatRegister extends Register {
-	private float value;
+	private Float value;
 
 	public FloatRegister(float value) {
 		super();

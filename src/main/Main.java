@@ -1,5 +1,6 @@
 package main;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import exceptions.*;
 
@@ -16,7 +17,11 @@ public class Main {
 		}
 		
 		parser.createMemoryOutputFile();
+		parser.createFloatRegistersOutputFile(tomasulo.getRegisters());
+//		parser.createTraceOutputFile(tomasulo.);
 		tomasulo.printInstructions();
 		tomasulo.printRegistersValues();
+	
+	
 	}
 }

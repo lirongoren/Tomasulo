@@ -24,7 +24,7 @@ public class Buffers {
 		
 	public boolean isThereFreeStoreBuffer(){
 		Collections.sort(storeBuffers);
-		if (storeBuffers.get(0).isBusy()==1){
+		if (storeBuffers.get(0).isBusy()){
 			return false;
 		}
 		return true;
@@ -32,7 +32,7 @@ public class Buffers {
 	
 	public boolean isThereFreeLoadBuffer(){
 		Collections.sort(loadBuffers);
-		if (loadBuffers.get(0).isBusy()==1){
+		if (loadBuffers.get(0).isBusy()){
 			return false;
 		}
 		return true;

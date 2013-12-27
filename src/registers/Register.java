@@ -25,6 +25,14 @@ public class Register {
 		this.status = Status.TAG;
 	}
 	
+	public Status getStatus() {
+		return this.status;
+	}
+	
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+	
 	public enum Status {
 		VALUE("value"),
 		TAG("tag");

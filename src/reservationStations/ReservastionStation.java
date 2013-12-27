@@ -27,8 +27,8 @@ public class ReservastionStation implements Comparable<ReservastionStation>{
 		this.opcode = opcode;
 	}
 
-	public int isBusy() {
-		return busy;
+	public boolean isBusy() {
+		return busy == Global.BUSY;
 	}
 
 	public void setBusy() {
@@ -55,8 +55,8 @@ public class ReservastionStation implements Comparable<ReservastionStation>{
 	public int compareTo(ReservastionStation o) {
 		String firstRSName = this.getNameOfStation();
 		String secondRSName = o.getNameOfStation();
-		Integer firstAvailable = this.isBusy();
-		Integer secondAvailable = o.isBusy();
+		Integer firstAvailable = this.isBusy() ? Global.BUSY : Global.IDLE;
+		Integer secondAvailable = o.isBusy() ? Global.BUSY : Global.IDLE;
 		
 		int result = firstAvailable.compareTo(secondAvailable);
 		if (result == 0){

@@ -1,4 +1,5 @@
 package main;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+
+import registers.Registers;
 
 public class Parser {
 
@@ -25,13 +28,13 @@ public class Parser {
 		try {
 			this.parseMemoryFile(memory_file);
 			this.parseConfigurationFile(configuration_file);
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param configuration_file
@@ -41,8 +44,8 @@ public class Parser {
 	private void parseConfigurationFile(String configuration_file)
 			throws IOException {
 
-		BufferedReader br = new BufferedReader(
-				new FileReader(configuration_file));
+		BufferedReader br = new BufferedReader(new FileReader(
+				configuration_file));
 		String str = "";
 
 		while ((str = br.readLine()) != null) {
@@ -63,47 +66,62 @@ public class Parser {
 	private void parseMemoryFile(String memory_file) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(memory_file));
 		String str = "";
-				
+
 		while ((str = br.readLine()) != null) {
-			str = str.replaceAll(" ", "").trim();			
+			str = str.replaceAll(" ", "").trim();
 			while (str.length() < 8) {
 				str = "0" + str;
 			}
-			memory.insert((int) Long.parseLong(str,16));
+			memory.insert((int) Long.parseLong(str, 16));
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @throws IOException
 	 */
-	public void createMemoryOutputFile() throws IOException{
-      File file = new File("memout.txt");
-      BufferedWriter output = new BufferedWriter(new FileWriter(file));
-      for (int i=0; i<1024; i++){
-    	  String str =   Integer.toHexString(memory.load(i));
-    	  while (str.length() < 8) {
-    		  str = "0" + str;
-    	  }
-    	  output.write(str);
-          output.newLine();
-      }
-      output.close();  
+	public void createMemoryOutputFile() throws IOException {
+		File file = new File("memout.txt");
+		BufferedWriter output = new BufferedWriter(new FileWriter(file));
+		for (int i = 0; i < 1024; i++) {
+			String str = Integer.toHexString(memory.load(i));
+			while (str.length() < 8) {
+				str = "0" + str;
+			}
+			output.write(str);
+			output.newLine();
+		}
+		output.close();
 	}
-	
-	//TODO
-	public void createTraceOutputFile(Queue<Instruction> instructions_queue){
+
+	// TODO
+	public void createTraceOutputFile(Queue<Instruction> instructions_queue)
+			throws IOException {
+		File file = new File("memout.txt");
+		BufferedWriter output = new BufferedWriter(new FileWriter(file));
+		for (int i = 0; i < 1024; i++) {
+			String str = Integer.toHexString(memory.load(i));
+			while (str.length() < 8) {
+				str = "0" + str;
+			}
+			output.write(str);
+			output.newLine();
+		}
 	}
-	
-	//TODO
-	public void createIntRegistersOutputFile(){
+
+	// TODO
+	public void createIntRegistersOutputFile()
+			throws IOException {
 	}
-	
-	//TODO
-	public void createFloatRegistersOutputFile(){
+
+	// TODO
+	public void createFloatRegistersOutputFile(Registers registers) throws IOException {
+		File file = new File("regout.txt");
+		BufferedWriter output = new BufferedWriter(new FileWriter(file));
+		registers.printFloatRegisters(output);
 	}
-	
-	//Getters & Setters
+
+	// Getters & Setters
 	public Map<String, Integer> getConfiguration() {
 		return configuration;
 	}
@@ -119,6 +137,5 @@ public class Parser {
 	public void setMemory(Memory memory) {
 		this.memory = memory;
 	}
-	
-	
+
 }

@@ -1,5 +1,10 @@
 package registers;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+
+import registers.Register.Status;
+
 public class Registers {
 	private IntRegister[] int_registers;
 	private FloatRegister[] float_registers;
@@ -45,5 +50,20 @@ public class Registers {
 	
 	public void setFloatRegisterTag(int register_number, String tag) {
 		this.float_registers[register_number].setTag(tag);
+	}
+	
+	public Status getIntRegisterStatus(int register_number) {
+		return int_registers[register_number].getStatus();
+	}
+	
+	public Status getFloatRegisterStatus(int register_number) {
+		return float_registers[register_number].getStatus();
+	}
+
+	public void printFloatRegisters(BufferedWriter output) throws IOException {
+		for (FloatRegister reg : float_registers) {
+			output.write(reg.toString());
+			output.newLine();
+		}
 	}
 }
