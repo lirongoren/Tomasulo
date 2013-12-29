@@ -15,6 +15,7 @@ public class AluReservationStation extends ReservastionStation {
 
 	public void setValue1(int value1) {
 		this.value1 = value1;
+		this.firstTag = "";
 	}
 
 	public float getValue2() {
@@ -23,5 +24,6 @@ public class AluReservationStation extends ReservastionStation {
 
 	public void setValue2(int value2) {
 		this.value2 = value2;
+		this.secondTag = "";
 	}
 }

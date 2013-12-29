@@ -1,25 +1,29 @@
 package main;
 
+import reservationStations.MulOrAddReservationStation;
+import reservationStations.ReservationStations;
+import buffers.Buffers;
+import buffers.LoadBuffer;
 import exceptions.UnknownOpcodeException;
 
 public class Instruction {
-	
+
 	String name = "";
 
-	int issue = 0;
-	int exec = 0;
-	// TODO: change exet field to start_exec and last_exec in order to calculate the delay 
-	int writeback = -1;
+	int issueCycle = -1;
+	int executeStartCycle = -1;
+	int executeEndCycle = -1;
+	int write2CDBCycle = -1;
 
 	Opcode OPCODE = Opcode.LD;
 	int DST = 0;
 	int SRC0 = 0;
 	int SRC1 = 0;
 	int IMM = 0;
-// TODO : change to string the station
-	int station = 0;
 
-	float result = 0;
+	String station = "";
+
+	Object result = null; /* Integer or Float */
 
 	public Instruction(String instruction) throws UnknownOpcodeException {
 		name = instruction;
@@ -28,6 +32,108 @@ public class Instruction {
 		SRC0 = getFirstSourceValue();
 		SRC1 = getSecondSourceValue();
 		IMM = getImmValue();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getIssueCycle() {
+		return issueCycle;
+	}
+
+	public void setIssueCycle(int issueCycle) {
+		this.issueCycle = issueCycle;
+	}
+
+	public int getExecuteStartCycle() {
+		return executeStartCycle;
+	}
+
+	public void setExecuteStartCycle(int executeStartCycle) {
+		this.executeStartCycle = executeStartCycle;
+	}
+
+	public int getExecuteEndCycle() {
+		return executeEndCycle;
+	}
+
+	public void setExecuteEndCycle(int clock) {
+		// TODO - calculate delay according to the unit
+		int delay = 0;
+		this.executeEndCycle = clock + delay;
+	}
+
+	public int getWrite2CDBCycle() {
+		return write2CDBCycle;
+	}
+
+	public void setWrite2CDBCycle(int write2cdbCycle) {
+		write2CDBCycle = write2cdbCycle;
+	}
+
+	public Opcode getOPCODE() {
+		return OPCODE;
+	}
+
+	public void setOPCODE(Opcode oPCODE) {
+		OPCODE = oPCODE;
+	}
+
+	public int getDST() {
+		return DST;
+	}
+
+	public void setDST(int dST) {
+		DST = dST;
+	}
+
+	public int getSRC0() {
+		return SRC0;
+	}
+
+	public void setSRC0(int sRC0) {
+		SRC0 = sRC0;
+	}
+
+	public int getSRC1() {
+		return SRC1;
+	}
+
+	public void setSRC1(int sRC1) {
+		SRC1 = sRC1;
+	}
+
+	public int getIMM() {
+		return IMM;
+	}
+
+	public void setIMM(int iMM) {
+		IMM = iMM;
+	}
+
+	public String getStation() {
+		return station;
+	}
+
+	public void setStation(String station) {
+		this.station = station;
+	}
+
+	public Object getResult() {
+		return result;
+	}
+
+	public void setResult(Object result) {
+		this.result = result;
+	}
+
+	public void execute() {
+		// TODO - implement
 	}
 
 	/**
@@ -72,17 +178,17 @@ public class Instruction {
 	public int getImmValue() {
 		int sign = Integer.parseInt(name.substring(16, 17), 2);
 		int num = Integer.parseInt(name.substring(17, 32), 2);
-		return (-1 * sign * ((int) Math.pow(2, 15) -1)) + num;
+		return (-1 * sign * ((int) Math.pow(2, 15) - 1)) + num;
 	}
-	
+
 	public int getSecondSourceValue() {
 		return Integer.parseInt(name.substring(12, 16), 2);
 	}
-	
+
 	public int getFirstSourceValue() {
 		return Integer.parseInt(name.substring(8, 12), 2);
 	}
-	
+
 	public int getDestinationValue() {
 		return Integer.parseInt(name.substring(4, 8), 2);
 	}
@@ -137,4 +243,29 @@ public class Instruction {
 		}
 	}
 
+	public boolean isReadyToBeExecuted(ReservationStations reservationStations,
+			Buffers buffers) {
+		switch (OPCODE) {
+		case LD:
+			return buffers.getLoadBuffer(station).isReady();
+		case ST:
+			return buffers.getStoreBuffer(station).isReady();
+		case JUMP:
+		case BEQ:
+		case BNE:
+			return false; // TODO - implement for last 3 cases
+		case ADD:
+		case ADDI:
+		case SUB:
+		case SUBI:
+		case ADD_S:
+		case SUB_S:
+		case MULT_S:
+			return reservationStations.getReservationStation(station).isReady();
+		case HALT:
+		default:
+			break;
+		}
+		return false;
+	}
 }

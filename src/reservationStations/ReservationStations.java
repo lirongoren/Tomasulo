@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import buffers.LoadBuffer;
+
 public class ReservationStations {
 
 //	Map<String, ReservastionStation> reservationStationsMap;
@@ -27,6 +29,25 @@ public class ReservationStations {
 		for (i=0 ; i<numAluRS ; i++){
 			aluReservationStations.add(new AluReservationStation(i, "ALU"));
 		}
+	}
+	
+	public ReservastionStation getReservationStation(String name) {
+		for (MulOrAddReservationStation RS : mulReservationStations) {
+			if (RS.getNameOfStation().equals(name)) {
+				return RS;
+			}
+		}
+		for (MulOrAddReservationStation RS : addReservationStations) {
+			if (RS.getNameOfStation().equals(name)) {
+				return RS;
+			}
+		}
+		for (AluReservationStation RS : aluReservationStations) {
+			if (RS.getNameOfStation().equals(name)) {
+				return RS;
+			}
+		}
+		return null;
 	}
 	
 	public boolean isThereFreeAluRS(){
@@ -78,5 +99,32 @@ public class ReservationStations {
 			}
 		}
 		return null;
+	}
+
+	public void updateTags(String station, Object object) {
+		for (AluReservationStation RS : aluReservationStations) {
+			if (RS.getFirstTag().equals(station)) {
+				RS.setValue1((int) object);
+			}
+			if (RS.getSecondTag().equals(station)) {
+				RS.setValue2((int) object);
+			}
+		}
+		for (MulOrAddReservationStation RS : mulReservationStations) {
+			if (RS.getFirstTag().equals(station)) {
+				RS.setValue1((int) object);
+			}
+			if (RS.getSecondTag().equals(station)) {
+				RS.setValue2((int) object);
+			}
+		}
+		for (MulOrAddReservationStation RS : addReservationStations) {
+			if (RS.getFirstTag().equals(station)) {
+				RS.setValue1((int) object);
+			}
+			if (RS.getSecondTag().equals(station)) {
+				RS.setValue2((int) object);
+			}
+		}
 	}
 }

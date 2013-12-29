@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 import registers.Register.Status;
+import reservationStations.AluReservationStation;
+import reservationStations.MulOrAddReservationStation;
 
 public class Registers {
 	private IntRegister[] int_registers;
@@ -18,6 +20,34 @@ public class Registers {
 		for (int i = 0; i < 16; i++) {
 			float_registers[i] = new FloatRegister((float) i);
 		}
+	}
+	
+	public void updateTags(String station, Object object) {
+		// TODO - implement
+//		for (IntRegister register : int_registers) {
+//			if (register.getFirstTag().equals(station)) {
+//				register.setValue1((int) object);
+//			}
+//			if (register.getSecondTag().equals(station)) {
+//				register.setValue2((int) object);
+//			}
+//		}
+//		for (MulOrAddReservationStation RS : mulReservationStations) {
+//			if (RS.getFirstTag().equals(station)) {
+//				RS.setValue1((int) object);
+//			}
+//			if (RS.getSecondTag().equals(station)) {
+//				RS.setValue2((int) object);
+//			}
+//		}
+//		for (MulOrAddReservationStation RS : addReservationStations) {
+//			if (RS.getFirstTag().equals(station)) {
+//				RS.setValue1((int) object);
+//			}
+//			if (RS.getSecondTag().equals(station)) {
+//				RS.setValue2((int) object);
+//			}
+//		}
 	}
 	
 	public String getIntRegisterTag(int register_number) {

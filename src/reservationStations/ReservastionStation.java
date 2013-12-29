@@ -6,13 +6,20 @@ import main.Instruction.Opcode;
 public class ReservastionStation implements Comparable<ReservastionStation>{
 	private Opcode opcode;
 	private int busy;
-	private String firstTag;
-	private String secondTag;
+	protected String firstTag;
+	protected String secondTag;
 	private String nameOfStation = "";
 	
 	public ReservastionStation(int i, String name) {
 		busy = Global.IDLE;
 		nameOfStation = name + i;
+	}
+	
+	public boolean isReady() {
+		if (firstTag.isEmpty() && secondTag.isEmpty()) {
+			return true;
+		}
+		return false;
 	}
 	
 	public String getNameOfStation() {
