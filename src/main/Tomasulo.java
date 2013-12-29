@@ -18,12 +18,12 @@ import exceptions.*;
 
 public class Tomasulo {
 
+	// TODO: add a static arrayList<Instruction> that will be sent later to the trace output file
 	private Queue<Instruction> instructions_queue;
 	private List<Instruction> execList;
 	private List<Instruction> wbList;
 
 	private Memory memory;
-	private Memory initial_memory;
 	private Registers registers;
 	private ReservationStations reservationStations;
 	private Buffers buffers;
@@ -56,9 +56,6 @@ public class Tomasulo {
 		wbList = new ArrayList<Instruction>();
 
 		memory = mem;
-		for (int i = 0; i < 1024; i++) {
-			initial_memory.insert(Integer.parseInt(memory.getInst(i)));
-		}
 		pc = 0;
 		clock = 0;
 		status = Global.UNFINISHED;
@@ -83,7 +80,7 @@ public class Tomasulo {
 
 			issue();
 			execute();
-			writeback();
+			writeToCDB();
 		}
 
 		else if (inst.OPCODE.equals(Opcode.HALT)) {
@@ -198,6 +195,20 @@ public class Tomasulo {
 		}
 	}
 
+	/* TODO:
+	 * 1. add a list of instructions between the issue() and execute() - the instruction will be added to the
+	 * waiting_list / exec_list
+	 * 2. we need to check 3 things in issue:
+	 * a. if there isn't a free RS, the instruction will stay in the instructions_queue.
+	 * b. if there is a free RS but some of them are tags, then the instruction will be added to the waiting_list &
+	 * popped out of the instructions_queue
+	 * c. if there is a free RS and the values are ready then the instruction will be added to the exec_list &
+	 * popped out of the instructions_queue
+	 * waiting_list: instructions that wait for the operands to be value and not tag reservation stations
+	 *  
+	 */
+	
+	
 	// TODO
 	public void issue() {
 		Instruction instruction = instructions_queue.peek();
@@ -263,6 +274,17 @@ public class Tomasulo {
 		clock++;
 	}
 
+	/* TODO:
+	 * iterate over the execList:
+	 * 1. if the instruction.exec_start == -1: update exec_start with clock, exec_end with clock + delay,
+	 * run instruction.execute() and update result (find the delay from the unit it should go into
+	 * according to the opcode
+	 * 2. else if exec_end == clock and if it is, update result and pop from waiting_list and
+	 * add to write2CDBList
+	 * 
+	 * instruction.execute() checks the opcode and according to the opcode, it runs the relevant unit.execute()
+	 * and its result will enter the instruction.result
+	 */
 	// TODO
 	public void execute() {
 		Instruction instruction = instructions_queue.peek();
@@ -330,14 +352,16 @@ public class Tomasulo {
 		}
 	}
 
+	/* TODO
+	 * 1. iterate over the write2CDBList, for each iteration iterate over the registers, RS's and buffers and update
+	 * the tags with the value of the instruction
+	 * 2. iterate over the waiting_list and for each instruction whose RS / buffer is ready, add the instruction
+	 * to the execList and pop it from the waitingList
+	 */
 	// TODO
-	public void writeback() {
+	public void writeToCDB() {
 		Instruction instruction = instructions_queue.poll();
 		instruction.writeback = pc;
-	}
-
-	private void writeToCDB() {
-		// TODO - implement
 	}
 
 	/**

@@ -8,6 +8,7 @@ public class Instruction {
 
 	int issue = 0;
 	int exec = 0;
+	// TODO: change exet field to start_exec and last_exec in order to calculate the delay 
 	int writeback = -1;
 
 	Opcode OPCODE = Opcode.LD;
@@ -15,10 +16,10 @@ public class Instruction {
 	int SRC0 = 0;
 	int SRC1 = 0;
 	int IMM = 0;
-
+// TODO : change to string the station
 	int station = 0;
 
-	float result = 0f;
+	float result = 0;
 
 	public Instruction(String instruction) throws UnknownOpcodeException {
 		name = instruction;
