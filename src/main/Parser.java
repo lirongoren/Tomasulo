@@ -33,7 +33,7 @@ public class Parser {
 			e.printStackTrace();
 		}
 	}
-
+/***************************************INPUT FILES************************************/
 	/**
 	 * 
 	 * @param configuration_file
@@ -74,7 +74,7 @@ public class Parser {
 			memory.insert((int) Long.parseLong(str, 16));
 		}
 	}
-
+/***************************************OUTPUT FILES************************************/
 	/**
 	 * 
 	 * @throws IOException
@@ -83,43 +83,66 @@ public class Parser {
 		File file = new File("memout.txt");
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		for (int i = 0; i < 1024; i++) {
-			String str = Integer.toHexString(memory.load(i));
-			while (str.length() < 8) {
-				str = "0" + str;
-			}
+			String str = memory.loadAsHexString(i);
 			output.write(str);
 			output.newLine();
 		}
 		output.close();
 	}
 
-	// TODO - update trace file
-	public void createTraceOutputFile(Queue<Instruction> instructions_queue)
-			throws IOException {
-		File file = new File("memout.txt");
+	/**
+	 * 
+	 * @param instructions_queue
+	 * @throws IOException
+	 */
+	public void createTraceOutputFile(Queue<Instruction> instructions_queue) throws IOException {
+		File file = new File("trace.txt");
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
-		for (int i = 0; i < 1024; i++) {
-			String str = Integer.toHexString(memory.load(i));
-			while (str.length() < 8) {
-				str = "0" + str;
+		String hexInst;
+		
+		for(Instruction inst : instructions_queue){
+			String line = "";
+			int decInst = (int) Long.parseLong(inst.getBinaryInst(), 2);
+			hexInst = Integer.toHexString(decInst);
+
+			while (hexInst.length() < 8) {
+				hexInst = "0" + hexInst;
 			}
-			output.write(str);
+			
+			line = hexInst + " " + inst.getIssueCycle() + " " + inst.getExecuteStartCycle() + " "
+					+ inst.getWriteToCDBCycle();
+			
+			output.write(line);
 			output.newLine();
 		}
+		output.close();
 	}
 
-	// TODO - do we need it?
-	public void createIntRegistersOutputFile()
-			throws IOException {
+	/**
+	 * 
+	 * @param registers
+	 * @throws IOException
+	 */
+	public void createIntRegistersOutputFile(Registers registers) throws IOException {
+		File file = new File("regint.txt");
+		BufferedWriter output = new BufferedWriter(new FileWriter(file));
+		registers.printIntRegisters(output);
+		output.close();
 	}
-
+	
+	/**
+	 * 
+	 * @param registers
+	 * @throws IOException
+	 */
 	public void createFloatRegistersOutputFile(Registers registers) throws IOException {
 		File file = new File("regout.txt");
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		registers.printFloatRegisters(output);
+		output.close();
 	}
 
-	// Getters & Setters
+/***************************************Getters & Setters *************************************/
 	public Map<String, Integer> getConfiguration() {
 		return configuration;
 	}

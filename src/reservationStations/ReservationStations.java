@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import buffers.LoadBuffer;
-
 public class ReservationStations {
 
 //	Map<String, ReservastionStation> reservationStationsMap;
@@ -66,7 +64,7 @@ public class ReservationStations {
 		return true;
 	}
 	
-	public boolean isThereFreeAddRS(){
+	public boolean isThereFreeAddSubRS(){
 		Collections.sort(addReservationStations);
 		if (addReservationStations.get(0).isBusy()){
 			return false;

@@ -1,7 +1,5 @@
 package main;
 import java.io.IOException;
-import java.io.PrintWriter;
-
 import exceptions.*;
 
 public class Main {
@@ -18,10 +16,10 @@ public class Main {
 		
 		parser.createMemoryOutputFile();
 		parser.createFloatRegistersOutputFile(tomasulo.getRegisters());
-//		parser.createTraceOutputFile(tomasulo.);
+		parser.createIntRegistersOutputFile(tomasulo.getRegisters());
+		parser.createTraceOutputFile(tomasulo.getInstructionsStaticQueue());
+		
 		tomasulo.printInstructions();
-		tomasulo.printRegistersValues();
-	
-	
+		tomasulo.printRegistersValues();	
 	}
 }

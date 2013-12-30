@@ -9,13 +9,14 @@ import main.Instruction.Opcode;
 import registers.Register.Status;
 import registers.Registers;
 import reservationStations.MulOrAddReservationStation;
-import reservationStations.ReservationStations;
+import reservationStations.*;
 import units.FPAddSub;
 import units.FPMul;
 import units.LoadStore;
 import units.integerALU;
 import buffers.Buffers;
 import buffers.LoadBuffer;
+import buffers.LoadStoreBuffer;
 import buffers.StoreBuffer;
 import exceptions.MissingNumberOfLoadStoreBuffersException;
 import exceptions.MissingNumberOfReservationStationsException;
@@ -24,18 +25,19 @@ import exceptions.UnknownOpcodeException;
 public class Tomasulo {
 
 	private Queue<Instruction> instructionsQueue;
+	private Queue<Instruction> instructionsStaticQueue;
+	
 	private ArrayList<Instruction> waitingList;
 	private ArrayList<Instruction> executeList;
-	private ArrayList<Instruction> write2CDBList;
-	
-	private ArrayList<Instruction> instructions;
+	private ArrayList<Instruction> writeToCDBList;
 
 	private Memory memory;
 	private Registers registers;
 	private ReservationStations reservationStations;
 	private Buffers buffers;
 
-	private boolean status;
+	private boolean fetchingStatus;
+	private boolean globalStatus;
 	private int clock;
 	private int pc;
 
@@ -48,23 +50,24 @@ public class Tomasulo {
 	 * 
 	 * @param mem
 	 * @param configuration
-	 * @throws MisssingNumberOfReservationStationsException
-	 * @throws MissingNumberOfLoadStoreBuffers
-	 * @throws MisssingReservationsException
-	 * @throws MissingLoadStoreBuffers
+	 * @throws MissingNumberOfReservationStationsException
+	 * @throws MissingNumberOfLoadStoreBuffersException
 	 */
 	public Tomasulo(Memory mem, Map<String, Integer> configuration)
 			throws MissingNumberOfReservationStationsException,
 			MissingNumberOfLoadStoreBuffersException {
+		
 		instructionsQueue = new LinkedList<Instruction>();
+		instructionsStaticQueue = new LinkedList<Instruction>();
 		waitingList = new ArrayList<Instruction>();
 		executeList = new ArrayList<Instruction>();
-		write2CDBList = new ArrayList<Instruction>();
+		writeToCDBList = new ArrayList<Instruction>();
 
 		memory = mem;
 		pc = 0;
 		clock = 0;
-		status = Global.UNFINISHED;
+		fetchingStatus = Global.UNFINISHED;
+		globalStatus = Global.UNFINISHED;
 
 		registers = new Registers();
 
@@ -72,60 +75,13 @@ public class Tomasulo {
 		initializeBuffers(configuration);
 		initializeUnits(configuration);
 	}
-
-	/**
-	 * 
-	 * @throws UnknownOpcodeException
-	 */
-	public void step() throws UnknownOpcodeException {
-		clock++; // TODO: check if here we need to increment the clock
-		Instruction instruction = fetchInstruction();
-		if (!instruction.OPCODE.equals(Opcode.HALT) && pc < memory.getMaxWords() - 1) {
-			instructionsQueue.add(instruction);
-			issue();
-			execute();
-			writeToCDB();
-		}
-
-		else if (instruction.OPCODE.equals(Opcode.HALT)) {
-			System.out.println("Instruction number " + pc
-					+ " is an HALT Operation");
-			status = Global.FINISHED;
-		}
-
-		else if (pc == memory.getMaxWords() - 1) {
-			System.out
-					.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
-			status = Global.FINISHED;
-		}
-	}
-
-	/**
-	 * Fetching an instruction from the memory to the Instruction Queue takes
-	 * one clock cycle.
-	 * 
-	 * @return
-	 * @throws UnknownOpcodeException
-	 */
-	private Instruction fetchInstruction() throws UnknownOpcodeException {
-		Instruction inst = new Instruction(memory.getInst(pc++));
-		return inst;
-	}
-
-	/**
-	 * For JUMP instructions.
-	 */
-	private void emptyInstructionsQueue() {
-		instructionsQueue.clear();
-	}
-
+	
 	/**
 	 * 
 	 * @param configuration
 	 * @throws MissingLoadStoreBuffers
 	 */
-	private void initializeBuffers(Map<String, Integer> configuration)
-			throws MissingNumberOfLoadStoreBuffersException {
+	private void initializeBuffers(Map<String, Integer> configuration)throws MissingNumberOfLoadStoreBuffersException {
 		int numLoadBuffers;
 		int numStoreBuffers;
 		try {
@@ -163,8 +119,7 @@ public class Tomasulo {
 		if (numMulRS == 0 || numAddRS == 0 || numAluRS == 0) {
 			throw new MissingNumberOfReservationStationsException();
 		}
-		reservationStations = new ReservationStations(numMulRS, numAddRS,
-				numAluRS);
+		reservationStations = new ReservationStations(numMulRS, numAddRS, numAluRS);
 	}
 
 	/**
@@ -198,6 +153,72 @@ public class Tomasulo {
 		}
 	}
 
+
+	/**
+	 * 
+	 * @throws UnknownOpcodeException
+	 */
+	public void step() throws UnknownOpcodeException {
+		fetchInstruction();
+		Instruction instruction = instructionsQueue.peek();
+		if (instruction != null){
+			if (!instruction.getOPCODE().equals(Opcode.HALT)) {		
+				issue();
+				execute();
+				writeToCDB();
+			}
+	
+			else if (instruction.getOPCODE().equals(Opcode.HALT)) {
+				System.out.println("Instruction number " + pc + " is an HALT Operation");
+				instructionsQueue.poll();
+				fetchingStatus = Global.FINISHED;
+			}
+		}
+		else{
+			//No more instructions to issue:
+			
+			if (!executeList.isEmpty()){
+				execute();
+			}
+			if (!writeToCDBList.isEmpty()){
+				writeToCDB();
+			}
+			if (executeList.isEmpty() && writeToCDBList.isEmpty()){
+				globalStatus = Global.FINISHED;
+			}
+		}
+	}
+
+	/**
+	 * Fetching an instruction from the memory to the Instruction Queue takes
+	 * one clock cycle.
+	 * 
+	 * @return
+	 * @throws UnknownOpcodeException
+	 */
+	private void fetchInstruction() throws UnknownOpcodeException {
+		
+		if (pc == memory.getMaxWords() - 1) {
+			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
+			fetchingStatus = Global.FINISHED;
+		}
+		else{
+			Instruction inst = new Instruction(memory.loadAsBinaryString(pc++));
+			instructionsQueue.add(inst);
+			instructionsStaticQueue.add(inst);
+			clock++;
+		}
+	}
+
+	/**
+	 * For JUMP instructions.
+	 */
+	@SuppressWarnings("unused")
+	private void emptyInstructionsQueue() {
+		instructionsQueue.clear();
+	}
+
+	
 	/* 
 	 * 1. add a list of instructions between the issue() and execute() - the instruction will be added to the
 	 * waiting_list / exec_list
@@ -212,76 +233,122 @@ public class Tomasulo {
 	 */
 	public void issue() {
 		Instruction instruction = instructionsQueue.peek();
-		instruction.setIssueCycle(clock);
-		if (instruction.OPCODE.equals(Opcode.LD)) {
+				
+		if (instruction.getIssueCycle() == -1){
+			instruction.setIssueCycle(clock);
+		}
+		
+		if (instruction.getOPCODE().equals(Opcode.LD)) {
 			if (buffers.isThereFreeLoadBuffer()) {
-				LoadBuffer buffer = buffers.getFreeLoadBuffer();
-				buffer.setBusy();
-				// TODO - update arguments of load buffer
+				LoadBuffer loadBuffer = buffers.getFreeLoadBuffer();
+				setBufferValues(loadBuffer, instruction);
+				
+				//Instruction is moving from issueQueue to execList:
+				executeList.add(instructionsQueue.poll());
 			}
-		} else if (instruction.OPCODE.equals(Opcode.ST)) {
+			else{
+				//No empty buffer yet. Will try again next cycle.
+			}
+		} 
+		
+		else if (instruction.getOPCODE().equals(Opcode.ST)) {
 			if (buffers.isThereFreeStoreBuffer()) {
-				StoreBuffer buffer = buffers.getFreeStoreBuffer();
-				buffer.setBusy();
-				// TODO - update arguments of store buffer
+				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
+				setBufferValues(storeBuffer, instruction);
+							
+				//Instruction is moving from issueQueue to execList:
+				executeList.add(instructionsQueue.poll());
 			}
-		} else if (instruction.OPCODE.equals(Opcode.ADD_S)
-				|| instruction.OPCODE.equals(Opcode.SUB_S)) {
-			if (reservationStations.isThereFreeAddRS()) {
-				MulOrAddReservationStation reservationStation = reservationStations
-						.getFreeAddReservationStation();
-				reservationStation.setBusy();
-				reservationStation.setOpcode(instruction.OPCODE);
-				if (registers.getFloatRegisterStatus(instruction.SRC0) == Status.VALUE) {
-					reservationStation.setValue1(registers
-							.getFloatRegisterValue(instruction.SRC0));
-				} else {
-					reservationStation.setFirstTag(registers
-							.getFloatRegisterTag(instruction.SRC0));
-				}
-				if (registers.getFloatRegisterStatus(instruction.SRC1) == Status.VALUE) {
-					reservationStation.setValue1(registers
-							.getFloatRegisterValue(instruction.SRC1));
-				} else {
-					reservationStation.setFirstTag(registers
-							.getFloatRegisterTag(instruction.SRC1));
-				}
-				registers.setFloatRegisterTag(instruction.DST,
-						reservationStation.getNameOfStation());
+			else{
+				//No empty buffer yet. Will try again next cycle.
 			}
-		} else if (instruction.OPCODE.equals(Opcode.MULT_S)) {
+		} 
+		
+		else if (instruction.getOPCODE().equals(Opcode.ADD_S) || instruction.getOPCODE().equals(Opcode.SUB_S)) {
+			if (reservationStations.isThereFreeAddSubRS()) {
+				MulOrAddReservationStation reservationStation = reservationStations.getFreeAddReservationStation();
+				setReservationStationValues(reservationStation, instruction);
+				
+				//Instruction is moving from issueQueue to execList:
+				executeList.add(instructionsQueue.poll());
+			}
+			else{
+				//No empty buffer yet. Will try again next cycle.
+			}
+		} 
+		
+		else if (instruction.getOPCODE().equals(Opcode.MULT_S)) {
 			if (reservationStations.isThereFreeMulRS()) {
-				MulOrAddReservationStation reservationStation = reservationStations
-						.getFreeMulReservationStation();
-				reservationStation.setBusy();
-				reservationStation.setOpcode(instruction.OPCODE);
-				if (registers.getFloatRegisterStatus(instruction.SRC0) == Status.VALUE) {
-					reservationStation.setValue1(registers
-							.getFloatRegisterValue(instruction.SRC0));
-				} else {
-					reservationStation.setFirstTag(registers
-							.getFloatRegisterTag(instruction.SRC0));
-				}
-				if (registers.getFloatRegisterStatus(instruction.SRC1) == Status.VALUE) {
-					reservationStation.setValue1(registers
-							.getFloatRegisterValue(instruction.SRC1));
-				} else {
-					reservationStation.setFirstTag(registers
-							.getFloatRegisterTag(instruction.SRC1));
-				}
-				registers.setFloatRegisterTag(instruction.DST,
-						reservationStation.getNameOfStation());
+				MulOrAddReservationStation reservationStation = reservationStations.getFreeMulReservationStation();
+				setReservationStationValues(reservationStation, instruction);
+				
+				//Instruction is moving from issueQueue to execList:
+				executeList.add(instructionsQueue.poll());		
 			}
-		} else if (instruction.OPCODE.equals(Opcode.JUMP)) {
+		} 
+		
+		else if (instruction.getOPCODE().equals(Opcode.ADD) || instruction.getOPCODE().equals(Opcode.SUB)) {
 			// TODO - implement
-		} else if (instruction.OPCODE.equals(Opcode.BNE)
-				|| instruction.OPCODE.equals(Opcode.BEQ)) {
+		} 
+		
+		else if(instruction.getOPCODE().equals(Opcode.ADDI) || instruction.getOPCODE().equals(Opcode.SUBI)){
+			
+		}
+		
+		else if (instruction.getOPCODE().equals(Opcode.JUMP)) {
 			// TODO - implement
-		} else {
+		} 
+		
+		else if (instruction.getOPCODE().equals(Opcode.BNE)	|| instruction.getOPCODE().equals(Opcode.BEQ)) {
+			// TODO - implement
+		}
+		
+		else {
 			// TODO - implement
 		}
 
-		clock++;
+		
+	}
+	
+	/**
+	 * 
+	 * @param reservationStation
+	 * @param instruction
+	 */
+	private void setReservationStationValues(MulOrAddReservationStation reservationStation,	Instruction instruction) {
+		reservationStation.setBusy();
+		reservationStation.setOpcode(instruction.getOPCODE());
+		
+		if (registers.getFloatRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
+			reservationStation.setValue1(registers.getFloatRegisterValue(instruction.getSRC0()));
+		} else {
+			reservationStation.setFirstTag(registers.getFloatRegisterTag(instruction.getSRC0()));
+		}
+		if (registers.getFloatRegisterStatus(instruction.getSRC1()) == Status.VALUE) {
+			reservationStation.setValue2(registers.getFloatRegisterValue(instruction.getSRC1()));
+		} else {
+			reservationStation.setSecondTag(registers.getFloatRegisterTag(instruction.getSRC1()));
+		}
+		registers.setFloatRegisterTag(instruction.getDST(),	reservationStation.getNameOfStation());
+		
+	}
+
+	/**
+	 * 
+	 * @param loadBuffer
+	 * @param instruction
+	 */
+	private void setBufferValues(LoadStoreBuffer loadBuffer, Instruction instruction) {
+		loadBuffer.setBusy();
+		loadBuffer.setOpcode(instruction.getOPCODE());
+		loadBuffer.setValue1(instruction.getIMM());
+		
+		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
+			loadBuffer.setValue2(registers.getIntRegisterValue(instruction.getSRC0()));
+		}
+		else{
+			loadBuffer.setSecondTag(registers.getIntRegisterTag(instruction.getSRC0()));
+		}
 	}
 
 	/* 
@@ -300,15 +367,37 @@ public class Tomasulo {
 			if (instruction.getExecuteStartCycle() < 0) { 
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
-				instruction.setExecuteEndCycle(clock);
+				instruction.setExecuteEndCycle(clock, getDelay(instruction));
 				instruction.execute(); // TODO - update execute() of instruction
 			}
 			else if (instruction.getExecuteEndCycle() == clock) { 
 				/* the instruction execution has ended */
-				write2CDBList.add(instruction);
+				writeToCDBList.add(instruction);
 				executeList.remove(instruction);
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @param instruction
+	 * @return
+	 */
+	private int getDelay(Instruction instruction) {
+		Opcode opcode = instruction.getOPCODE();
+		
+		if (opcode.equals(Opcode.LD) || opcode.equals(Opcode.ST)){
+			return load_store_unit.getDelay();
+		}
+		else if (opcode.equals(Opcode.ADD_S) || opcode.equals(Opcode.SUB_S)){
+			return FP_add_sub_unit.getDelay();
+		}
+		
+		else if (opcode.equals(Opcode.MULT_S)){
+			return FP_mult_unit.getDelay();
+		}
+		
+		return alu_unit.getDelay();
 	}
 
 	/* 
@@ -318,8 +407,8 @@ public class Tomasulo {
 	 * to the execList and pop it from the waitingList
 	 */
 	public void writeToCDB() {
-		for (Instruction instruction : write2CDBList) {
-			instruction.setWrite2CDBCycle(clock);
+		for (Instruction instruction : writeToCDBList) {
+			instruction.setWriteToCDBCycle(clock);
 			reservationStations.updateTags(instruction.getStation(), instruction.getResult());
 			buffers.updateTags(instruction.getStation(), instruction.getResult());
 			registers.updateTags(instruction.getStation(), instruction.getResult());
@@ -340,18 +429,19 @@ public class Tomasulo {
 	public void printInstructions() throws UnknownOpcodeException {
 		System.out.println("Input Instructions:\n");
 		int j = 0;
-		String str;
+		String binStr;
 
 		for (Instruction inst : instructionsQueue) {
 			System.out.println("Instruction number " + j + ":");
-			str = memory.getInst(j++);
-			inst = new Instruction(str);
+			binStr = memory.loadAsBinaryString(j++);
+			
+			inst = new Instruction(binStr);
 
-			System.out.println("OPCODE: " + inst.OPCODE);
-			System.out.println("DST: " + inst.DST);
-			System.out.println("SRC0: " + inst.SRC0);
-			System.out.println("SRC1: " + inst.SRC1);
-			System.out.println("IMM: " + inst.IMM);
+			System.out.println("OPCODE: " + inst.getOPCODE());
+			System.out.println("DST: " + inst.getDST());
+			System.out.println("SRC0: " + inst.getSRC0());
+			System.out.println("SRC1: " + inst.getSRC1());
+			System.out.println("IMM: " + inst.getIMM());
 			System.out.println();
 		}
 	}
@@ -375,11 +465,15 @@ public class Tomasulo {
 
 	// Getters & Setters:
 	public boolean isFinished() {
-		return status;
+		return fetchingStatus;
 	}
 
 	public Registers getRegisters() {
 		return this.registers;
+	}
+	
+	public Queue<Instruction> getInstructionsStaticQueue() {
+		return instructionsStaticQueue;
 	}
 
 }

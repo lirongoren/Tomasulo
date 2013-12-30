@@ -45,15 +45,23 @@ public class Memory {
     	return mem[pointer]; 
     }
     
+    public String loadAsHexString(int pointer){
+    	String result = Integer.toHexString(mem[pointer]);
+		while (result.length() < 8) {
+			result = "0" + result;
+		}
+		return result;
+    }
+    
     /**
      * 
-     * @param instNum
+     * @param pointer
      * @return
      */
-	public String getInst(int instNum) {
-		String result = Integer.toBinaryString(mem[instNum]);
+	public String loadAsBinaryString(int pointer) {
+		String result = Integer.toBinaryString(mem[pointer]);
 		while (result.length()<32){
-			result = 0 + result;
+			result = "0" + result;
 		}
 		return result;
 	}	

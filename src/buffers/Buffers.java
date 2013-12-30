@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import reservationStations.AluReservationStation;
-import reservationStations.MulOrAddReservationStation;
-
 public class Buffers {
 	
 	private List<StoreBuffer> storeBuffers;

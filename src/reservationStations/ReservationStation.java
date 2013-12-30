@@ -6,8 +6,8 @@ import main.Instruction.Opcode;
 public class ReservationStation implements Comparable<ReservationStation>{
 	private Opcode opcode;
 	private int busy;
-	protected String firstTag;
-	protected String secondTag;
+	protected String firstTag = "";
+	protected String secondTag = "";
 	private String nameOfStation = "";
 	
 	public ReservationStation(int i, String name) {

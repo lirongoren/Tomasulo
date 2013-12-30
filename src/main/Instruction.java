@@ -1,32 +1,29 @@
 package main;
 
-import reservationStations.MulOrAddReservationStation;
 import reservationStations.ReservationStations;
 import buffers.Buffers;
-import buffers.LoadBuffer;
 import exceptions.UnknownOpcodeException;
 
 public class Instruction {
 
-	String name = "";
+	private String binaryInst = "";
+	private String station = "";
+	
+	private int issueCycle = -1;
+	private int executeStartCycle = -1;
+	private int executeEndCycle = -1;
+	private int writeToCDBCycle = -1;
 
-	int issueCycle = -1;
-	int executeStartCycle = -1;
-	int executeEndCycle = -1;
-	int write2CDBCycle = -1;
-
-	Opcode OPCODE = Opcode.LD;
-	int DST = 0;
-	int SRC0 = 0;
-	int SRC1 = 0;
-	int IMM = 0;
-
-	String station = "";
+	private Opcode OPCODE = Opcode.LD;
+	private int DST = 0;
+	private int SRC0 = 0;
+	private int SRC1 = 0;
+	private int IMM = 0;
 
 	Object result = null; /* Integer or Float */
 
-	public Instruction(String instruction) throws UnknownOpcodeException {
-		name = instruction;
+	public Instruction(String binaryInst) throws UnknownOpcodeException {
+		this.binaryInst = binaryInst;
 		OPCODE = createOpcode(getOpcodeValue());
 		DST = getDestinationValue();
 		SRC0 = getFirstSourceValue();
@@ -34,12 +31,12 @@ public class Instruction {
 		IMM = getImmValue();
 	}
 
-	public String getName() {
-		return name;
+	public String getBinaryInst() {
+		return binaryInst;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setBinaryInst(String binaryInst) {
+		this.binaryInst = binaryInst;
 	}
 
 	public int getIssueCycle() {
@@ -62,18 +59,16 @@ public class Instruction {
 		return executeEndCycle;
 	}
 
-	public void setExecuteEndCycle(int clock) {
-		// TODO - calculate delay according to the unit
-		int delay = 0;
+	public void setExecuteEndCycle(int clock, int delay) {
 		this.executeEndCycle = clock + delay;
 	}
 
-	public int getWrite2CDBCycle() {
-		return write2CDBCycle;
+	public int getWriteToCDBCycle() {
+		return writeToCDBCycle;
 	}
 
-	public void setWrite2CDBCycle(int write2cdbCycle) {
-		write2CDBCycle = write2cdbCycle;
+	public void setWriteToCDBCycle(int writeTocdbCycle) {
+		writeToCDBCycle = writeTocdbCycle;
 	}
 
 	public Opcode getOPCODE() {
@@ -176,25 +171,25 @@ public class Instruction {
 	}
 
 	public int getImmValue() {
-		int sign = Integer.parseInt(name.substring(16, 17), 2);
-		int num = Integer.parseInt(name.substring(17, 32), 2);
+		int sign = Integer.parseInt(binaryInst.substring(16, 17), 2);
+		int num = Integer.parseInt(binaryInst.substring(17, 32), 2);
 		return (-1 * sign * ((int) Math.pow(2, 15) - 1)) + num;
 	}
 
 	public int getSecondSourceValue() {
-		return Integer.parseInt(name.substring(12, 16), 2);
+		return Integer.parseInt(binaryInst.substring(12, 16), 2);
 	}
 
 	public int getFirstSourceValue() {
-		return Integer.parseInt(name.substring(8, 12), 2);
+		return Integer.parseInt(binaryInst.substring(8, 12), 2);
 	}
 
 	public int getDestinationValue() {
-		return Integer.parseInt(name.substring(4, 8), 2);
+		return Integer.parseInt(binaryInst.substring(4, 8), 2);
 	}
 
 	public int getOpcodeValue() {
-		return Integer.parseInt(name.substring(0, 4), 2);
+		return Integer.parseInt(binaryInst.substring(0, 4), 2);
 	}
 
 	public enum Opcode {

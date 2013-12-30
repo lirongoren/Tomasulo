@@ -7,4 +7,8 @@ public class Unit {
 		this.delay = delay;
 	}
 	
+	public int getDelay() {
+		return delay;
+	}
+	
 }

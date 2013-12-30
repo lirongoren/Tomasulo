@@ -2,10 +2,7 @@ package registers;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-
 import registers.Register.Status;
-import reservationStations.AluReservationStation;
-import reservationStations.MulOrAddReservationStation;
 
 public class Registers {
 	private IntRegister[] int_registers;
@@ -63,8 +60,8 @@ public class Registers {
 		this.int_registers[register_number].setTag(tag);
 	}
 	
-	public void setFloatRegisterTag(int register_number, String tag) {
-		this.float_registers[register_number].setTag(tag);
+	public void setFloatRegisterTag(int register_number, String nameOfStation) {
+		this.float_registers[register_number].setTag(nameOfStation);
 	}
 	
 	public Status getIntRegisterStatus(int register_number) {
@@ -77,7 +74,16 @@ public class Registers {
 
 	public void printFloatRegisters(BufferedWriter output) throws IOException {
 		for (FloatRegister reg : float_registers) {
-			output.write(reg.toString());
+			output.write(Float.toString(reg.getValue()));
+			output.newLine();
+			
+			
+		}
+	}
+	
+	public void printIntRegisters(BufferedWriter output) throws IOException {
+		for (IntRegister reg : int_registers) {
+			output.write(Integer.toString(reg.getValue()));
 			output.newLine();
 		}
 	}
