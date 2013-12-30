@@ -161,14 +161,16 @@ public class Tomasulo {
 		fetchInstruction();
 		Instruction instruction = instructionsQueue.peek();
 		if (instruction != null){
-			if (!instruction.getOPCODE().equals(Opcode.HALT)) {		
-				issue();
-				if (!executeList.isEmpty()){
-					execute();
-				}
+			if (!instruction.getOPCODE().equals(Opcode.HALT)) {	
 				if (!writeToCDBList.isEmpty()){
 					writeToCDB();
 				}
+				
+				if (!executeList.isEmpty()){
+					execute();
+				}
+								
+				issue();
 			}
 	
 			else if (instruction.getOPCODE().equals(Opcode.HALT)) {
