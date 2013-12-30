@@ -224,6 +224,8 @@ public class Tomasulo {
 	 * waiting_list / exec_list
 	 * 2. we need to check 3 things in issue:
 	 * a. if there isn't a free RS, the instruction will stay in the instructions_queue.
+	 *    we will peek it again in the next issue cycle, after fetching one more instruction from the memory
+	 *    to the instructions queue.
 	 * b. if there is a free RS but some of them are tags, then the instruction will be added to the waiting_list &
 	 * popped out of the instructions_queue
 	 * c. if there is a free RS and the values are ready then the instruction will be added to the exec_list &
@@ -241,10 +243,8 @@ public class Tomasulo {
 		if (instruction.getOPCODE().equals(Opcode.LD)) {
 			if (buffers.isThereFreeLoadBuffer()) {
 				LoadBuffer loadBuffer = buffers.getFreeLoadBuffer();
-				setBufferValues(loadBuffer, instruction);
-				
-				//Instruction is moving from issueQueue to execList:
-				executeList.add(instructionsQueue.poll());
+				setBufferValues(loadBuffer, instruction);			
+				registers.setFloatRegisterTag(instruction.getDST(),	loadBuffer.getNameOfStation());
 			}
 			else{
 				//No empty buffer yet. Will try again next cycle.
@@ -255,9 +255,6 @@ public class Tomasulo {
 			if (buffers.isThereFreeStoreBuffer()) {
 				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
 				setBufferValues(storeBuffer, instruction);
-							
-				//Instruction is moving from issueQueue to execList:
-				executeList.add(instructionsQueue.poll());
 			}
 			else{
 				//No empty buffer yet. Will try again next cycle.
@@ -267,10 +264,7 @@ public class Tomasulo {
 		else if (instruction.getOPCODE().equals(Opcode.ADD_S) || instruction.getOPCODE().equals(Opcode.SUB_S)) {
 			if (reservationStations.isThereFreeAddSubRS()) {
 				MulOrAddReservationStation reservationStation = reservationStations.getFreeAddReservationStation();
-				setReservationStationValues(reservationStation, instruction);
-				
-				//Instruction is moving from issueQueue to execList:
-				executeList.add(instructionsQueue.poll());
+				setFloatReservationStationValues(reservationStation, instruction);
 			}
 			else{
 				//No empty buffer yet. Will try again next cycle.
@@ -280,10 +274,7 @@ public class Tomasulo {
 		else if (instruction.getOPCODE().equals(Opcode.MULT_S)) {
 			if (reservationStations.isThereFreeMulRS()) {
 				MulOrAddReservationStation reservationStation = reservationStations.getFreeMulReservationStation();
-				setReservationStationValues(reservationStation, instruction);
-				
-				//Instruction is moving from issueQueue to execList:
-				executeList.add(instructionsQueue.poll());		
+				setFloatReservationStationValues(reservationStation, instruction);		
 			}
 		} 
 		
@@ -315,22 +306,31 @@ public class Tomasulo {
 	 * @param reservationStation
 	 * @param instruction
 	 */
-	private void setReservationStationValues(MulOrAddReservationStation reservationStation,	Instruction instruction) {
+	private void setFloatReservationStationValues(MulOrAddReservationStation reservationStation,	Instruction instruction) {
 		reservationStation.setBusy();
 		reservationStation.setOpcode(instruction.getOPCODE());
+		boolean insertToWaitingList = false;
 		
 		if (registers.getFloatRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
 			reservationStation.setValue1(registers.getFloatRegisterValue(instruction.getSRC0()));
 		} else {
 			reservationStation.setFirstTag(registers.getFloatRegisterTag(instruction.getSRC0()));
+			insertToWaitingList = true;
 		}
 		if (registers.getFloatRegisterStatus(instruction.getSRC1()) == Status.VALUE) {
 			reservationStation.setValue2(registers.getFloatRegisterValue(instruction.getSRC1()));
 		} else {
 			reservationStation.setSecondTag(registers.getFloatRegisterTag(instruction.getSRC1()));
+			insertToWaitingList = true;
 		}
 		registers.setFloatRegisterTag(instruction.getDST(),	reservationStation.getNameOfStation());
 		
+		if (insertToWaitingList){
+			waitingList.add(instructionsQueue.poll());
+		}
+		else{
+			executeList.add(instructionsQueue.poll());
+		}
 	}
 
 	/**
@@ -345,9 +345,11 @@ public class Tomasulo {
 		
 		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
 			loadBuffer.setValue2(registers.getIntRegisterValue(instruction.getSRC0()));
+			executeList.add(instructionsQueue.poll());
 		}
 		else{
-			loadBuffer.setSecondTag(registers.getIntRegisterTag(instruction.getSRC0()));
+			loadBuffer.setSecondTag(registers.getIntRegisterTag(instruction.getSRC1()));
+			waitingList.add(instructionsQueue.poll());
 		}
 	}
 
