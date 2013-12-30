@@ -25,6 +25,24 @@ public class Buffers {
 		}
 	}
 	
+	public LoadBuffer getFreeLoadBuffer() {
+		for (LoadBuffer buffer: loadBuffers) {
+			if (!buffer.isBusy()) {
+				return buffer;
+			}
+		}
+		return null;
+	}
+	
+	public StoreBuffer getFreeStoreBuffer() {
+		for (StoreBuffer buffer: storeBuffers) {
+			if (!buffer.isBusy()) {
+				return buffer;
+			}
+		}
+		return null;
+	}
+	
 	public LoadBuffer getLoadBuffer(String name) {
 		for (LoadBuffer loadBuffer : loadBuffers) {
 			if (loadBuffer.getNameOfStation().equals(name)) {

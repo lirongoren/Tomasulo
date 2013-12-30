@@ -1,6 +1,6 @@
 package reservationStations;
 
-public class AluReservationStation extends ReservastionStation {
+public class AluReservationStation extends ReservationStation {
 
 	private int value1;
 	private int value2;

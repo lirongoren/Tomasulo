@@ -1,16 +1,17 @@
 package units;
 
-import cdb.CDB;
-
 public class integerALU extends Unit {
 
-	public integerALU(int delay, CDB cdb) {
-		super(delay, cdb);
-		// TODO Auto-generated constructor stub
+	public integerALU(int delay) {
+		super(delay);
 	}
 
-	public integerALU(CDB cdb) {
-		this(0, cdb);
+	public integerALU() {
+		this(0);
+	}
+	
+	public void execute() {
+		// TODO - implement
 	}
 
 }

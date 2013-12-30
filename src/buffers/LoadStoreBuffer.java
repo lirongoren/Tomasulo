@@ -1,8 +1,8 @@
 package buffers;
 
-import reservationStations.ReservastionStation;
+import reservationStations.ReservationStation;
 
-public class LoadStoreBuffer extends ReservastionStation{
+public class LoadStoreBuffer extends ReservationStation{
 	
 	private int address;
 		

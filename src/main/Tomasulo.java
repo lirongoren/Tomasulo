@@ -2,7 +2,6 @@ package main;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -10,16 +9,20 @@ import main.Instruction.Opcode;
 import registers.Register.Status;
 import registers.Registers;
 import reservationStations.MulOrAddReservationStation;
-import reservationStations.ReservastionStation;
 import reservationStations.ReservationStations;
-import units.*;
-import buffers.*;
-import cdb.CDB;
-import exceptions.*;
+import units.FPAddSub;
+import units.FPMul;
+import units.LoadStore;
+import units.integerALU;
+import buffers.Buffers;
+import buffers.LoadBuffer;
+import buffers.StoreBuffer;
+import exceptions.MissingNumberOfLoadStoreBuffersException;
+import exceptions.MissingNumberOfReservationStationsException;
+import exceptions.UnknownOpcodeException;
 
 public class Tomasulo {
 
-	// TODO: add a static arrayList<Instruction> that will be sent later to the trace output file
 	private Queue<Instruction> instructionsQueue;
 	private ArrayList<Instruction> waitingList;
 	private ArrayList<Instruction> executeList;
@@ -35,8 +38,6 @@ public class Tomasulo {
 	private boolean status;
 	private int clock;
 	private int pc;
-
-	private CDB cdb;
 
 	private integerALU alu_unit;
 	private FPAddSub FP_add_sub_unit;
@@ -67,8 +68,6 @@ public class Tomasulo {
 
 		registers = new Registers();
 
-//		cdb = new CDB();
-
 		initializeReservationStations(configuration);
 		initializeBuffers(configuration);
 		initializeUnits(configuration);
@@ -80,15 +79,15 @@ public class Tomasulo {
 	 */
 	public void step() throws UnknownOpcodeException {
 		clock++; // TODO: check if here we need to increment the clock
-		Instruction inst = fetchInstruction();
-		if (!inst.OPCODE.equals(Opcode.HALT) && pc < memory.getMaxWords() - 1) {
-			instructionsQueue.add(inst);
+		Instruction instruction = fetchInstruction();
+		if (!instruction.OPCODE.equals(Opcode.HALT) && pc < memory.getMaxWords() - 1) {
+			instructionsQueue.add(instruction);
 			issue();
 			execute();
 			writeToCDB();
 		}
 
-		else if (inst.OPCODE.equals(Opcode.HALT)) {
+		else if (instruction.OPCODE.equals(Opcode.HALT)) {
 			System.out.println("Instruction number " + pc
 					+ " is an HALT Operation");
 			status = Global.FINISHED;
@@ -175,31 +174,31 @@ public class Tomasulo {
 	 */
 	private void initializeUnits(Map<String, Integer> configuration) {
 		try {
-			alu_unit = new integerALU(configuration.get("int_delay"), cdb);
+			alu_unit = new integerALU(configuration.get("int_delay"));
 		} catch (NullPointerException e) {
-			alu_unit = new integerALU(cdb);
+			alu_unit = new integerALU();
 		}
 
 		try {
-			FP_add_sub_unit = new FPAddSub(configuration.get("add_delay"), cdb);
+			FP_add_sub_unit = new FPAddSub(configuration.get("add_delay"));
 		} catch (NullPointerException e) {
-			FP_add_sub_unit = new FPAddSub(cdb);
+			FP_add_sub_unit = new FPAddSub();
 		}
 
 		try {
-			FP_mult_unit = new FPMul(configuration.get("mul_delay"), cdb);
+			FP_mult_unit = new FPMul(configuration.get("mul_delay"));
 		} catch (NullPointerException e) {
-			FP_mult_unit = new FPMul(cdb);
+			FP_mult_unit = new FPMul();
 		}
 
 		try {
-			load_store_unit = new LoadStore(configuration.get("mem_delay"), cdb);
+			load_store_unit = new LoadStore(configuration.get("mem_delay"));
 		} catch (NullPointerException e) {
-			load_store_unit = new LoadStore(cdb);
+			load_store_unit = new LoadStore();
 		}
 	}
 
-	/* TODO:
+	/* 
 	 * 1. add a list of instructions between the issue() and execute() - the instruction will be added to the
 	 * waiting_list / exec_list
 	 * 2. we need to check 3 things in issue:
@@ -214,8 +213,18 @@ public class Tomasulo {
 	public void issue() {
 		Instruction instruction = instructionsQueue.peek();
 		instruction.setIssueCycle(clock);
-		if (instruction.OPCODE.equals(Opcode.LD) || instruction.OPCODE.equals(Opcode.ST)) {
-// TODO - do with buffers
+		if (instruction.OPCODE.equals(Opcode.LD)) {
+			if (buffers.isThereFreeLoadBuffer()) {
+				LoadBuffer buffer = buffers.getFreeLoadBuffer();
+				buffer.setBusy();
+				// TODO - update arguments of load buffer
+			}
+		} else if (instruction.OPCODE.equals(Opcode.ST)) {
+			if (buffers.isThereFreeStoreBuffer()) {
+				StoreBuffer buffer = buffers.getFreeStoreBuffer();
+				buffer.setBusy();
+				// TODO - update arguments of store buffer
+			}
 		} else if (instruction.OPCODE.equals(Opcode.ADD_S)
 				|| instruction.OPCODE.equals(Opcode.SUB_S)) {
 			if (reservationStations.isThereFreeAddRS()) {
@@ -275,7 +284,7 @@ public class Tomasulo {
 		clock++;
 	}
 
-	/* TODO:
+	/* 
 	 * iterate over the execList:
 	 * 1. if the instruction.exec_start == -1: update exec_start with clock, exec_end with clock + delay,
 	 * run instruction.execute() and update result (find the delay from the unit it should go into
@@ -292,7 +301,7 @@ public class Tomasulo {
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
 				instruction.setExecuteEndCycle(clock);
-				instruction.execute();
+				instruction.execute(); // TODO - update execute() of instruction
 			}
 			else if (instruction.getExecuteEndCycle() == clock) { 
 				/* the instruction execution has ended */
@@ -300,72 +309,9 @@ public class Tomasulo {
 				executeList.remove(instruction);
 			}
 		}
-//		Instruction instruction = execList.
-//		instruction.exec = pc;
-//		int int_result, memory_location;
-//		float float_result;
-//		switch (instruction.OPCODE) {
-//		case LD:
-//			memory_location = registers.getIntRegisterValue(instruction.SRC0) + instruction.IMM;
-//			registers.setFloatRegisterValue(instruction.DST, memory.load(memory_location));
-//			break;
-//		case ST:
-//			memory_location = registers.getIntRegisterValue(instruction.SRC0) + instruction.IMM;
-//			memory.store(memory_location, (int) registers.getFloatRegisterValue(instruction.SRC1));
-//			break;
-//		case JUMP:
-//			// TODO - implement
-//			break;
-//		case BEQ:
-//			// TODO - implement
-//			break;
-//		case BNE:
-//			// TODO - implement
-//			break;
-//		case ADD:
-//			int_result = registers.getIntRegisterValue(instruction.SRC0)
-//					+ registers.getIntRegisterValue(instruction.SRC1);
-//			registers.setIntRegisterValue(instruction.DST, int_result);
-//			break;
-//		case ADDI:
-//			int_result = registers.getIntRegisterValue(instruction.SRC0)
-//					+ instruction.IMM;
-//			registers.setIntRegisterValue(instruction.DST, int_result);
-//			break;
-//		case SUB:
-//			int_result = registers.getIntRegisterValue(instruction.SRC0)
-//					- registers.getIntRegisterValue(instruction.SRC1);
-//			registers.setIntRegisterValue(instruction.DST, int_result);
-//			break;
-//		case SUBI:
-//			int_result = registers.getIntRegisterValue(instruction.SRC0)
-//					- instruction.IMM;
-//			registers.setIntRegisterValue(instruction.DST, int_result);
-//			break;
-//		case ADD_S:
-//			float_result = registers.getFloatRegisterValue(instruction.SRC0)
-//					+ registers.getFloatRegisterValue(instruction.SRC1);
-//			registers.setFloatRegisterValue(instruction.DST, float_result);
-//			break;
-//		case SUB_S:
-//			float_result = registers.getFloatRegisterValue(instruction.SRC0)
-//					- registers.getFloatRegisterValue(instruction.SRC1);
-//			registers.setFloatRegisterValue(instruction.DST, float_result);
-//			break;
-//		case MULT_S:
-//			float_result = registers.getFloatRegisterValue(instruction.SRC0)
-//					* registers.getFloatRegisterValue(instruction.SRC1);
-//			registers.setFloatRegisterValue(instruction.DST, float_result);
-//			break;
-//		case HALT:
-//			// TODO - implement
-//			break;
-//		default:
-//			break;
-//		}
 	}
 
-	/* TODO
+	/* 
 	 * 1. iterate over the write2CDBList, for each iteration iterate over the registers, RS's and buffers and update
 	 * the tags with the value of the instruction
 	 * 2. iterate over the waiting_list and for each instruction whose RS / buffer is ready, add the instruction
@@ -373,6 +319,7 @@ public class Tomasulo {
 	 */
 	public void writeToCDB() {
 		for (Instruction instruction : write2CDBList) {
+			instruction.setWrite2CDBCycle(clock);
 			reservationStations.updateTags(instruction.getStation(), instruction.getResult());
 			buffers.updateTags(instruction.getStation(), instruction.getResult());
 			registers.updateTags(instruction.getStation(), instruction.getResult());

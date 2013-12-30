@@ -23,31 +23,16 @@ public class Registers {
 	}
 	
 	public void updateTags(String station, Object object) {
-		// TODO - implement
-//		for (IntRegister register : int_registers) {
-//			if (register.getFirstTag().equals(station)) {
-//				register.setValue1((int) object);
-//			}
-//			if (register.getSecondTag().equals(station)) {
-//				register.setValue2((int) object);
-//			}
-//		}
-//		for (MulOrAddReservationStation RS : mulReservationStations) {
-//			if (RS.getFirstTag().equals(station)) {
-//				RS.setValue1((int) object);
-//			}
-//			if (RS.getSecondTag().equals(station)) {
-//				RS.setValue2((int) object);
-//			}
-//		}
-//		for (MulOrAddReservationStation RS : addReservationStations) {
-//			if (RS.getFirstTag().equals(station)) {
-//				RS.setValue1((int) object);
-//			}
-//			if (RS.getSecondTag().equals(station)) {
-//				RS.setValue2((int) object);
-//			}
-//		}
+		for (IntRegister register : int_registers) {
+			if (register.getTag().equals(station)) {
+				register.setValue((int) object);
+			}
+		}
+		for (FloatRegister register : float_registers) {
+			if (register.getTag().equals(station)) {
+				register.setValue((float) object);
+			}
+		}
 	}
 	
 	public String getIntRegisterTag(int register_number) {

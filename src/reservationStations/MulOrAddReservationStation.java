@@ -1,6 +1,6 @@
 package reservationStations;
 
-public class MulOrAddReservationStation extends ReservastionStation{
+public class MulOrAddReservationStation extends ReservationStation{
 	
 	private float value1;
 	private float value2;

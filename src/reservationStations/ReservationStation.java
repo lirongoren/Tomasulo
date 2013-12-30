@@ -3,14 +3,14 @@ package reservationStations;
 import main.Global;
 import main.Instruction.Opcode;
 
-public class ReservastionStation implements Comparable<ReservastionStation>{
+public class ReservationStation implements Comparable<ReservationStation>{
 	private Opcode opcode;
 	private int busy;
 	protected String firstTag;
 	protected String secondTag;
 	private String nameOfStation = "";
 	
-	public ReservastionStation(int i, String name) {
+	public ReservationStation(int i, String name) {
 		busy = Global.IDLE;
 		nameOfStation = name + i;
 	}
@@ -59,7 +59,7 @@ public class ReservastionStation implements Comparable<ReservastionStation>{
 	}
 
 	@Override
-	public int compareTo(ReservastionStation o) {
+	public int compareTo(ReservationStation o) {
 		String firstRSName = this.getNameOfStation();
 		String secondRSName = o.getNameOfStation();
 		Integer firstAvailable = this.isBusy() ? Global.BUSY : Global.IDLE;

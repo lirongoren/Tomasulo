@@ -1,16 +1,17 @@
 package units;
 
-import cdb.CDB;
-
 public class FPMul extends Unit {
 
-	public FPMul(int delay, CDB cdb) {
-		super(delay, cdb);
-		// TODO Auto-generated constructor stub
+	public FPMul(int delay) {
+		super(delay);
 	}
 
-	public FPMul(CDB cdb) {
-		this (0, cdb);
+	public FPMul() {
+		this (0);
+	}
+	
+	public void execute() {
+		// TODO - implement
 	}
 
 }

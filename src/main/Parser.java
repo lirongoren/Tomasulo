@@ -30,7 +30,6 @@ public class Parser {
 			this.parseConfigurationFile(configuration_file);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -94,7 +93,7 @@ public class Parser {
 		output.close();
 	}
 
-	// TODO
+	// TODO - update trace file
 	public void createTraceOutputFile(Queue<Instruction> instructions_queue)
 			throws IOException {
 		File file = new File("memout.txt");
@@ -109,12 +108,11 @@ public class Parser {
 		}
 	}
 
-	// TODO
+	// TODO - do we need it?
 	public void createIntRegistersOutputFile()
 			throws IOException {
 	}
 
-	// TODO
 	public void createFloatRegistersOutputFile(Registers registers) throws IOException {
 		File file = new File("regout.txt");
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));

@@ -31,7 +31,7 @@ public class ReservationStations {
 		}
 	}
 	
-	public ReservastionStation getReservationStation(String name) {
+	public ReservationStation getReservationStation(String name) {
 		for (MulOrAddReservationStation RS : mulReservationStations) {
 			if (RS.getNameOfStation().equals(name)) {
 				return RS;

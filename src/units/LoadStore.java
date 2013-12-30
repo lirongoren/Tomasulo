@@ -1,16 +1,17 @@
 package units;
 
-import cdb.CDB;
-
 public class LoadStore extends Unit {
 
-	public LoadStore(int delay, CDB cdb) {
-		super(delay, cdb);
-		// TODO Auto-generated constructor stub
+	public LoadStore(int delay) {
+		super(delay);
 	}
 
-	public LoadStore(CDB cdb) {
-		this(0, cdb);
+	public LoadStore() {
+		this(0);
+	}
+	
+	public void execute() {
+		// TODO - implement
 	}
 
 }
