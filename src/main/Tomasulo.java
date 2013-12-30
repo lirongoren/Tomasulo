@@ -387,7 +387,7 @@ public class Tomasulo {
 				executeList.remove(instruction);
 			}
 			count++;			
-		}
+		} 
 	}
 	
 	private void executeInstruction(Instruction instruction) {
