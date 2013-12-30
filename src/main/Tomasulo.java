@@ -366,7 +366,6 @@ public class Tomasulo {
 	 * and its result will enter the instruction.result
 	 */
 	public void execute() {
-		clock++;
 		int count = 0;
 		
 		while (count < executeList.size()){
