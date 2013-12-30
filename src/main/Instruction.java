@@ -132,10 +132,6 @@ public class Instruction {
 	public void execute(int clock) {
 		if (clock == executeEndCycle){
 			// TODO - implement
-			
-			if (getOPCODE().equals(OPCODE.LD)){
-				
-			}
 		}
 	}
 

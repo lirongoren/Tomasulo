@@ -8,7 +8,6 @@ import java.util.Queue;
 import main.Instruction.Opcode;
 import registers.Register.Status;
 import registers.Registers;
-import reservationStations.MulOrAddReservationStation;
 import reservationStations.*;
 import units.FPAddSub;
 import units.FPMul;
@@ -164,8 +163,12 @@ public class Tomasulo {
 		if (instruction != null){
 			if (!instruction.getOPCODE().equals(Opcode.HALT)) {		
 				issue();
-				execute();
-				writeToCDB();
+				if (!executeList.isEmpty()){
+					execute();
+				}
+				if (!writeToCDBList.isEmpty()){
+					writeToCDB();
+				}
 			}
 	
 			else if (instruction.getOPCODE().equals(Opcode.HALT)) {
@@ -371,16 +374,31 @@ public class Tomasulo {
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
 				instruction.setExecuteEndCycle(clock, getDelay(instruction));
-				instruction.execute(clock); // TODO - update execute() of instruction
+				executeInstruction(instruction);
 			}
 			else if (instruction.getExecuteEndCycle() == clock) { 
 				/* the instruction execution has ended */
 				writeToCDBList.add(instruction);
-				executeList.remove(instruction);
+//				executeList.remove(instruction);
 			}
 		}
 	}
 	
+	private void executeInstruction(Instruction instruction) {
+		if (instruction.getExecuteEndCycle() == clock){
+			
+			if (instruction.getOPCODE().equals(Opcode.LD)){
+				LoadBuffer loadBuffer = buffers.getLoadBuffer(instruction.getStation());
+				loadBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0());
+			}
+			
+			//TODO - other instructions types
+			
+			
+		}
+	
+	}
+
 	/**
 	 * 
 	 * @param instruction

@@ -2,23 +2,32 @@ package buffers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Buffers {
 	
+	private Map<String, LoadStoreBuffer> buffers;
 	private List<StoreBuffer> storeBuffers;
 	private List<LoadBuffer> loadBuffers;
 
 	public Buffers(int numStoreBuffers, int numLoadBuffers){	
 		int i;
+		buffers = new HashMap<String, LoadStoreBuffer>();
+		
 		storeBuffers = new ArrayList<StoreBuffer>();
 		for (i=0 ; i<numStoreBuffers ; i++){
-			storeBuffers.add(new StoreBuffer(i, "STORE"));
+			StoreBuffer storeBuffer = new StoreBuffer(i, "STORE");
+			storeBuffers.add(storeBuffer);
+			buffers.put(storeBuffer.getNameOfStation(), storeBuffer);
 		}
 		
 		loadBuffers = new ArrayList<LoadBuffer>();
 		for (i=0 ; i<numLoadBuffers ; i++){
-			loadBuffers.add(new LoadBuffer(i, "LOAD"));
+			LoadBuffer loadBuffer = new LoadBuffer(i, "LOAD");
+			loadBuffers.add(loadBuffer);
+			buffers.put(loadBuffer.getNameOfStation(), loadBuffer);
 		}
 	}
 	
@@ -41,21 +50,11 @@ public class Buffers {
 	}
 	
 	public LoadBuffer getLoadBuffer(String name) {
-		for (LoadBuffer loadBuffer : loadBuffers) {
-			if (loadBuffer.getNameOfStation().equals(name)) {
-				return loadBuffer;
-			}
-		}
-		return null;
+		return (LoadBuffer) buffers.get(name);
 	}
 	
 	public StoreBuffer getStoreBuffer(String name) {
-		for (StoreBuffer storeBuffer : storeBuffers) {
-			if (storeBuffer.getNameOfStation().equals(name)) {
-				return storeBuffer;
-			}
-		}
-		return null;
+		return (StoreBuffer) buffers.get(name);
 	}
 		
 	public boolean isThereFreeStoreBuffer(){

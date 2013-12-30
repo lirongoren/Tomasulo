@@ -3,10 +3,11 @@ package reservationStations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ReservationStations {
 
-//	Map<String, ReservastionStation> reservationStationsMap;
+//	Map<String, ReservationStation> reservationStationsMap;
 	
 	private List<MulOrAddReservationStation> mulReservationStations;
 	private List<MulOrAddReservationStation> addReservationStations;
