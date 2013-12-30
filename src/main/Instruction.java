@@ -1,9 +1,7 @@
 package main;
 
 import reservationStations.ReservationStations;
-import units.LoadStore;
 import buffers.Buffers;
-import buffers.LoadStoreBuffer;
 import exceptions.UnknownOpcodeException;
 
 public class Instruction {

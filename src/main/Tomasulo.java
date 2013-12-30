@@ -193,14 +193,11 @@ public class Tomasulo {
 	}
 
 	/**
-	 * Fetching an instruction from the memory to the Instruction Queue takes
-	 * one clock cycle.
-	 * 
+	 * Fetching an instruction from the memory to the Instruction Queue takes one clock cycle.
 	 * @return
 	 * @throws UnknownOpcodeException
 	 */
 	private void fetchInstruction() throws UnknownOpcodeException {
-		
 		if (pc == memory.getMaxWords() - 1) {
 			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 			fetchingStatus = Global.FINISHED;
@@ -258,6 +255,7 @@ public class Tomasulo {
 			if (buffers.isThereFreeStoreBuffer()) {
 				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
 				setBufferValues(storeBuffer, instruction);
+				//No need to set tag of the destination register, as the destination is the memory.
 			}
 			else{
 				//No empty buffer yet. Will try again next cycle.
@@ -369,7 +367,10 @@ public class Tomasulo {
 	 */
 	public void execute() {
 		clock++;
-		for (Instruction instruction : executeList) {
+		int count = 0;
+		
+		while (count < executeList.size()){
+			Instruction instruction = executeList.get(count);
 			if (instruction.getExecuteStartCycle() < 0) { 
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
@@ -379,8 +380,9 @@ public class Tomasulo {
 			else if (instruction.getExecuteEndCycle() == clock) { 
 				/* the instruction execution has ended */
 				writeToCDBList.add(instruction);
-//				executeList.remove(instruction);
+				executeList.remove(instruction);
 			}
+			count++;			
 		}
 	}
 	
@@ -393,6 +395,8 @@ public class Tomasulo {
 			}
 			
 			//TODO - other instructions types
+			
+			//Important - store has no writeToCDB. it ends after the execute.
 			
 			
 		}

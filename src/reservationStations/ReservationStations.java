@@ -2,12 +2,13 @@ package reservationStations;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ReservationStations {
 
-//	Map<String, ReservationStation> reservationStationsMap;
+	private Map<String, ReservationStation> reservationStationsMap;
 	
 	private List<MulOrAddReservationStation> mulReservationStations;
 	private List<MulOrAddReservationStation> addReservationStations;
@@ -16,37 +17,30 @@ public class ReservationStations {
 	
 	public ReservationStations(int numMulRS, int numAddRS, int numAluRS){	
 		int i;
+		reservationStationsMap = new HashMap<String, ReservationStation>();
+		
 		mulReservationStations = new ArrayList<MulOrAddReservationStation>();
 		for (i=0 ; i<numMulRS ; i++){
-			mulReservationStations.add(new MulOrAddReservationStation(i, "MUL"));
+			MulOrAddReservationStation res = new MulOrAddReservationStation(i, "MUL");
+			mulReservationStations.add(res);
+			reservationStationsMap.put(res.getNameOfStation(), res);
 		}
 		addReservationStations = new ArrayList<MulOrAddReservationStation>();
 		for (i=0 ; i<numAddRS ; i++){
-			addReservationStations.add(new MulOrAddReservationStation(i, "ADD"));
+			MulOrAddReservationStation res = new MulOrAddReservationStation(i, "ADD");
+			addReservationStations.add(res);
+			reservationStationsMap.put(res.getNameOfStation(), res);
 		}
 		aluReservationStations = new ArrayList<AluReservationStation>();
 		for (i=0 ; i<numAluRS ; i++){
-			aluReservationStations.add(new AluReservationStation(i, "ALU"));
+			AluReservationStation res = new AluReservationStation(i, "ALU");
+			aluReservationStations.add(res);
+			reservationStationsMap.put(res.getNameOfStation(), res);
 		}
 	}
 	
 	public ReservationStation getReservationStation(String name) {
-		for (MulOrAddReservationStation RS : mulReservationStations) {
-			if (RS.getNameOfStation().equals(name)) {
-				return RS;
-			}
-		}
-		for (MulOrAddReservationStation RS : addReservationStations) {
-			if (RS.getNameOfStation().equals(name)) {
-				return RS;
-			}
-		}
-		for (AluReservationStation RS : aluReservationStations) {
-			if (RS.getNameOfStation().equals(name)) {
-				return RS;
-			}
-		}
-		return null;
+		return reservationStationsMap.get(name);
 	}
 	
 	public boolean isThereFreeAluRS(){
