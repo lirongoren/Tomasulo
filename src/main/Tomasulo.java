@@ -206,6 +206,9 @@ public class Tomasulo {
 		}
 		else{
 			Instruction inst = new Instruction(memory.loadAsBinaryString(pc++));
+			if (inst.getOPCODE().equals(Opcode.HALT)){
+				fetchingStatus = Global.FINISHED;
+			}
 			instructionsQueue.add(inst);
 			instructionsStaticQueue.add(inst);
 			clock++;
@@ -456,7 +459,10 @@ public class Tomasulo {
 		System.out.println("Input Instructions:\n");
 		int j = 0;
 		String binStr;
-
+		while (fetchingStatus==globalStatus){
+			fetchInstruction();
+		}
+		
 		for (Instruction inst : instructionsQueue) {
 			System.out.println("Instruction number " + j + ":");
 			binStr = memory.loadAsBinaryString(j++);

@@ -22,4 +22,6 @@ public class Main {
 		tomasulo.printInstructions();
 		tomasulo.printRegistersValues();	
 	}
+	
+	
 }
