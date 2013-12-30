@@ -10,9 +10,9 @@ public class Main {
 		Parser parser = new Parser(args[0], args[1]);
 		Tomasulo tomasulo = new Tomasulo(parser.getMemory(), parser.getConfiguration());
 
-//		while (!tomasulo.isFinished()) {
-//			tomasulo.step();
-//		}
+		while (!tomasulo.isFinished()) {
+			tomasulo.step();
+		}
 		
 		parser.createMemoryOutputFile();
 		parser.createFloatRegistersOutputFile(tomasulo.getRegisters());
