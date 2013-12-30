@@ -1,7 +1,9 @@
 package main;
 
 import reservationStations.ReservationStations;
+import units.LoadStore;
 import buffers.Buffers;
+import buffers.LoadStoreBuffer;
 import exceptions.UnknownOpcodeException;
 
 public class Instruction {
@@ -127,8 +129,14 @@ public class Instruction {
 		this.result = result;
 	}
 
-	public void execute() {
-		// TODO - implement
+	public void execute(int clock) {
+		if (clock == executeEndCycle){
+			// TODO - implement
+			
+			if (getOPCODE().equals(OPCODE.LD)){
+				
+			}
+		}
 	}
 
 	/**

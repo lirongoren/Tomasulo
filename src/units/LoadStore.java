@@ -10,7 +10,7 @@ public class LoadStore extends Unit {
 		this(0);
 	}
 	
-	public void execute() {
+	public static void execute() {
 		// TODO - implement
 	}
 

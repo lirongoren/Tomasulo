@@ -13,7 +13,7 @@ public class LoadStoreBuffer extends ReservationStation{
 	}
 	
 	public void calculateAddress(int imm, int registerValue){
-		address = imm + registerValue;
+		address = value1 + value2;
 	}
 	
 	public int getAddress() {

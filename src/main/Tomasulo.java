@@ -365,12 +365,13 @@ public class Tomasulo {
 	 * and its result will enter the instruction.result
 	 */
 	public void execute() {
+		clock++;
 		for (Instruction instruction : executeList) {
 			if (instruction.getExecuteStartCycle() < 0) { 
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
 				instruction.setExecuteEndCycle(clock, getDelay(instruction));
-				instruction.execute(); // TODO - update execute() of instruction
+				instruction.execute(clock); // TODO - update execute() of instruction
 			}
 			else if (instruction.getExecuteEndCycle() == clock) { 
 				/* the instruction execution has ended */
