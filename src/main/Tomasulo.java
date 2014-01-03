@@ -286,16 +286,22 @@ public class Tomasulo {
 				MulOrAddReservationStation reservationStation = reservationStations.getFreeMulReservationStation();
 				setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);		
 			}
+			else{
+				//No empty RS yet. Will try again next cycle.
+			}
 		} 
 		
-		else if (instruction.getOPCODE().equals(Opcode.ADD) || instruction.getOPCODE().equals(Opcode.SUB)) {
-			// TODO - implement
+		else if (instruction.getOPCODE().equals(Opcode.ADD) || instruction.getOPCODE().equals(Opcode.SUB)
+				|| instruction.getOPCODE().equals(Opcode.ADDI) || instruction.getOPCODE().equals(Opcode.SUBI)) {
+			if (reservationStations.isThereFreeAluRS()) {
+				AluReservationStation reservationStation = reservationStations.getFreeAluReservationStation();
+				setAluReservationStationValues(reservationStation, instruction, tmpExecuteList);
+			}
+			else{
+				//No empty RS yet. Will try again next cycle.
+			}
 		} 
-		
-		else if(instruction.getOPCODE().equals(Opcode.ADDI) || instruction.getOPCODE().equals(Opcode.SUBI)){
-			
-		}
-		
+				
 		else if (instruction.getOPCODE().equals(Opcode.JUMP)) {
 			// TODO - implement
 		} 
@@ -311,6 +317,50 @@ public class Tomasulo {
 		
 	}
 	
+	/**
+	 * 
+	 * @param reservationStation
+	 * @param instruction
+	 * @param tmpExecuteList
+	 */
+	private void setAluReservationStationValues(AluReservationStation reservationStation, Instruction instruction,
+			ArrayList<Instruction> tmpExecuteList) {
+
+		reservationStation.setBusy();
+		reservationStation.setOpcode(instruction.getOPCODE());
+		instruction.setStation(reservationStation.getNameOfStation());
+		boolean insertToWaitingList = false;
+		
+		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
+			reservationStation.setValue1(registers.getIntRegisterValue(instruction.getSRC0()));
+		} else {
+			reservationStation.setFirstTag(registers.getIntRegisterTag(instruction.getSRC0()));
+			insertToWaitingList = true;
+		}
+		
+		if (instruction.getOPCODE().equals(Opcode.ADD) || instruction.getOPCODE().equals(Opcode.SUB)) {
+			if (registers.getIntRegisterStatus(instruction.getSRC1()) == Status.VALUE) {
+				reservationStation.setValue2(registers.getIntRegisterValue(instruction.getSRC1()));
+			} else {
+				reservationStation.setSecondTag(registers.getIntRegisterTag(instruction.getSRC1()));
+				insertToWaitingList = true;
+			}	
+		}
+		
+		else if ((instruction.getOPCODE().equals(Opcode.ADDI) || instruction.getOPCODE().equals(Opcode.SUBI))){
+			reservationStation.setValue2(instruction.getIMM());
+		}
+			
+		registers.setIntRegisterTag(instruction.getDST(), reservationStation.getNameOfStation());
+		
+		if (insertToWaitingList){
+			waitingList.add(instructionsQueue.poll());
+		}
+		else{
+			tmpExecuteList.add(instructionsQueue.poll());
+		}
+	}
+
 	/**
 	 * 
 	 * @param reservationStation
