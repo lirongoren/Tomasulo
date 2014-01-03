@@ -97,26 +97,26 @@ public class ReservationStations {
 	public void updateTags(String station, Object object) {
 		for (AluReservationStation RS : aluReservationStations) {
 			if (RS.getFirstTag().equals(station)) {
-				RS.setValue1((int) object);
+				RS.setValue1((Integer) Integer.parseInt(object.toString()));
 			}
 			if (RS.getSecondTag().equals(station)) {
-				RS.setValue2((int) object);
+				RS.setValue2((Integer) Integer.parseInt(object.toString()));
 			}
 		}
 		for (MulOrAddReservationStation RS : mulReservationStations) {
 			if (RS.getFirstTag().equals(station)) {
-				RS.setValue1((float) object);
+				RS.setValue1(Float.parseFloat(object.toString()));
 			}
 			if (RS.getSecondTag().equals(station)) {
-				RS.setValue2((float) object);
+				RS.setValue2(Float.parseFloat(object.toString()));
 			}
 		}
 		for (MulOrAddReservationStation RS : addReservationStations) {
 			if (RS.getFirstTag().equals(station)) {
-				RS.setValue1((float) object);
+				RS.setValue1(Float.parseFloat(object.toString()));
 			}
 			if (RS.getSecondTag().equals(station)) {
-				RS.setValue2((float) object);
+				RS.setValue2(Float.parseFloat(object.toString()));
 			}
 		}
 	}

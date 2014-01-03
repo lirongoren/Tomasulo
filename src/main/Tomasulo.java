@@ -452,8 +452,11 @@ public class Tomasulo {
 		switch (instruction.getOPCODE()) {
 		case LD:
 			LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
-			registers.setFloatRegisterValue(instruction.getDST(), memory.load(load_buffer.getAddress()));
-			instruction.setResult(registers.getFloatRegisterValue(instruction.getDST()));
+			
+//			registers.setFloatRegisterValue(instruction.getDST(), memory.load(load_buffer.getAddress()));
+//			instruction.setResult(registers.getFloatRegisterValue(instruction.getDST()));
+			
+			instruction.setResult(memory.load(load_buffer.getAddress()));
 			break;
 		case ST:
 			StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());

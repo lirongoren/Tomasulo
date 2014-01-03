@@ -2,6 +2,7 @@ package registers;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+
 import registers.Register.Status;
 
 public class Registers {
@@ -22,12 +23,12 @@ public class Registers {
 	public void updateTags(String station, Object object) {
 		for (IntRegister register : int_registers) {
 			if (register.getTag().equals(station)) {
-				register.setValue((int) object);
+				register.setValue((Integer) Integer.parseInt(object.toString()));
 			}
 		}
 		for (FloatRegister register : float_registers) {
 			if (register.getTag().equals(station)) {
-				register.setValue((float) object);
+				register.setValue(Float.parseFloat(object.toString()));
 			}
 		}
 	}
