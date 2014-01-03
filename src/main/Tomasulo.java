@@ -160,45 +160,32 @@ public class Tomasulo {
 	 * @throws ProgramCounterOutOfBoundException 
 	 */
 	public void step() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
-		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
-		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
-		
-		fetchInstruction();
-		Instruction instruction = instructionsQueue.peek();
-		if (instruction != null){
-			if (!instruction.getOPCODE().equals(Opcode.HALT)) {	
-				
-				issue(tmpExecuteList);
-				
-				if (!executeList.isEmpty()){
-					execute(tmpWriteToCDBList);
-				}
-				if (!writeToCDBList.isEmpty()){
-					writeToCDB();
-				}
-			}
-	
-			else if (instruction.getOPCODE().equals(Opcode.HALT)) {
-				instructionsQueue.poll();
-			}
-		}
-		else{
-			//No more instructions to issue - instructionsQueue is empty:
-			
-			if (!executeList.isEmpty()){
-				execute(tmpWriteToCDBList);
-			}
-			if (!writeToCDBList.isEmpty()){
-				writeToCDB();
-			}
-			if (executeList.isEmpty() && writeToCDBList.isEmpty()){
-				globalStatus = Global.FINISHED;
-			}
-		}
-		
-		executeList.addAll(tmpExecuteList);
-		writeToCDBList.addAll(tmpWriteToCDBList);
-	}
+        ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
+        ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
+        
+        fetchInstruction();
+        Instruction instruction = instructionsQueue.peek();
+        if (instruction != null){
+               if (!instruction.getOPCODE().equals(Opcode.HALT)) {    
+                     issue(tmpExecuteList);
+               }
+               else if (instruction.getOPCODE().equals(Opcode.HALT)) {
+                     instructionsQueue.poll();
+               }
+        }
+ 
+        execute(tmpWriteToCDBList);
+        writeToCDB(); 
+        
+        executeList.addAll(tmpExecuteList);
+        writeToCDBList.addAll(tmpWriteToCDBList);
+        
+        if (executeList.isEmpty() && writeToCDBList.isEmpty()){
+               globalStatus = Global.FINISHED;
+        }
+ }
+
+
 
 	/**
 	 * Fetching an instruction from the memory to the Instruction Queue takes one clock cycle.
