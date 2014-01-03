@@ -1,6 +1,5 @@
 package main;
 
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
@@ -156,8 +155,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method ...
-	 * 
+	 * This method triggers the Tomasulo algorithm for one clock cycle.
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
@@ -193,52 +191,13 @@ public class Tomasulo {
 			globalStatus = Global.FINISHED;
 		}
 
-		System.out.println("Reservation Stations: cycle" + this.clock);
-		System.out.println("Name\tOp\tVj\tVk\tQj\tQk\tA\tInstr #");
-		for (LoadBuffer buffer : buffers.getLoadBuffers()) {
-			if (buffer.isBusy()) {
-				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
-						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
-			} else {
-				System.out.println(buffer.getNameOfStation());
-			}
-		}
-		for (StoreBuffer buffer : buffers.getStoreBuffers()) {
-			if (buffer.isBusy()) {
-				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
-						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
-			} else {
-				System.out.println(buffer.getNameOfStation());
-			}
-		}
-		for (AluReservationStation RS : reservationStations.getAluReservationStations()) {
-			if (RS.isBusy()) {
-				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
-						+ RS.getSecondTag() + "\t\t\t");
-			} else {
-				System.out.println(RS.getNameOfStation());
-			}
-		}
-		for (MulOrAddReservationStation RS : reservationStations.getAddReservationStations()) {
-			if (RS.isBusy()) {
-				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
-						+ RS.getSecondTag() + "\t\t\t");
-			} else {
-				System.out.println(RS.getNameOfStation());
-			}
-		}
-		for (MulOrAddReservationStation RS : reservationStations.getMulReservationStations()) {
-			if (RS.isBusy()) {
-				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
-						+ RS.getSecondTag() + "\t\t\t");
-			} else {
-				System.out.println(RS.getNameOfStation());
-			}
-		}
+		printReservationStations();
 	}
 
 	/**
-	 * 
+	 * Every step of Tomasulo algorithm we call this method in order to check if some
+	 * instructions can be moved from the waiting list to the executing list as the operands are ready
+	 * in the appropriate reservation station.
 	 */
 	private void handleWaitingList() {
 		ArrayList<Instruction> tmpRemovedWaitingList = new ArrayList<Instruction>();
@@ -251,31 +210,34 @@ public class Tomasulo {
 		if (!tmpRemovedWaitingList.isEmpty()) {
 			waitingList.removeAll(tmpRemovedWaitingList);
 		}
-
 	}
 
 	/**
 	 * Fetching an instruction from the memory to the Instruction Queue takes
 	 * one clock cycle.
-	 * 
-	 * @return
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
 	private void fetchInstruction() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
-		if (pc < 0 || pc > 1023) {
-			throw new ProgramCounterOutOfBoundException();
-		}
-		if (pc == memory.getMaxWords() - 1) {
-			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
-			fetchingStatus = Global.FINISHED;
-		} else if (fetchingStatus == Global.UNFINISHED) {
-			Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
-			if (inst.getOPCODE().equals(Opcode.HALT)) {
-				fetchingStatus = Global.FINISHED;
+		if (fetchingStatus == Global.UNFINISHED){
+			if (pc < 0 || pc > memory.getMaxWords()-1) {
+				//We may get here as a result of invalid JUMP instruction.
+				throw new ProgramCounterOutOfBoundException();
 			}
-			instructionsQueue.add(inst);
-			instructionsStaticQueue.add(inst);
+			if (pc == memory.getMaxWords()-1) {
+				//We may get here if no HALT instruction was found.
+				System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
+				fetchingStatus = Global.FINISHED;
+			} 
+			else {
+				//Legal situation - fetching an instruction from the memory:
+				Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
+				if (inst.getOPCODE().equals(Opcode.HALT)) {
+					fetchingStatus = Global.FINISHED;
+				}
+				instructionsQueue.add(inst);
+				instructionsStaticQueue.add(inst);
+			}
 		}
 		clock++;
 	}
@@ -287,18 +249,23 @@ public class Tomasulo {
 		instructionsQueue.clear();
 	}
 
-	/*
-	 * 1. add a list of instructions between the issue() and execute() - the
-	 * instruction will be added to the waiting_list / exec_list 2. we need to
-	 * check 3 things in issue: a. if there isn't a free RS, the instruction
-	 * will stay in the instructions_queue. we will peek it again in the next
-	 * issue cycle, after fetching one more instruction from the memory to the
-	 * instructions queue. b. if there is a free RS but some of them are tags,
-	 * then the instruction will be added to the waiting_list & popped out of
-	 * the instructions_queue c. if there is a free RS and the values are ready
-	 * then the instruction will be added to the exec_list & popped out of the
-	 * instructions_queue waiting_list: instructions that wait for the operands
-	 * to be value and not tag reservation stations
+	/**
+	 * The issue method responsible for the decoding stage of the top instruction in the 
+	 * instruction queue each clock cycle, as long we have instruction to fetch from the memory.
+	 * 
+	 * We will consider the following scenarios:
+	 * 1. If there isn't a free appropriate reservation station,
+	 * 	  the instruction will stay in the instructions_queue. We will peek it again in the next issue cycle, 
+	 * 	  after fetching one more instruction from the memory to the instructions queue.
+	 *	  This is what we call structural hazard..
+	 *
+	 * 2. If there is a free reservation station but some of the operands are tags,
+	 * 	  then the instruction will be added to the waiting_list & popped out of
+	 *    the instructions_queue.
+	 *    
+	 * 3. if there is a free reservation station and the operands are ready values from the registers,
+	 * 	  then the instruction will be added to the execute list & popped out of the
+	 * 	  instructions_queue waiting_list.
 	 */
 	public void issue(ArrayList<Instruction> tmpExecuteList) {
 		Instruction instruction = instructionsQueue.peek();
@@ -321,8 +288,7 @@ public class Tomasulo {
 			if (buffers.isThereFreeStoreBuffer()) {
 				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
 				setBufferValues(storeBuffer, instruction, tmpExecuteList);
-				// No need to set tag of the destination register, as the
-				// destination is the memory.
+				// No need to set tag of the destination register, as the destination is the memory.
 			} else {
 				// No empty buffer yet. Will try again next cycle.
 			}
@@ -362,13 +328,46 @@ public class Tomasulo {
 		}
 
 		else if (instruction.getOPCODE().equals(Opcode.BNE) || instruction.getOPCODE().equals(Opcode.BEQ)) {
-			// TODO - implement
+			branchResolution(instruction);
 		}
-
 	}
 
 	/**
-	 * 
+	 * This method checks if the operands of the jump instruction are ready.
+	 * If not - return and the jump instruction will stay at the top of the instructions queue.
+	 * If yes - calculate the branch operation result and change the pc accordingly.
+	 * @param instruction
+	 */
+	private void branchResolution(Instruction instruction) {
+		 int firstValue;
+		 int secondValue;
+		 
+		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
+			 firstValue = registers.getIntRegisterValue(instruction.getSRC0());
+		} else {
+			//There is a data dependency.
+			return;
+		}
+		
+		if (registers.getIntRegisterStatus(instruction.getSRC1()) == Status.VALUE) {
+			 secondValue = registers.getIntRegisterValue(instruction.getSRC1());
+		} else {
+			//There is a data dependency.
+			return;
+		}
+		
+		if (instruction.getOPCODE().equals(Opcode.BNE) && firstValue!=secondValue){
+			pc = instruction.getPc() + instruction.getIMM();
+			emptyInstructionsQueue();
+		}
+		else if (instruction.getOPCODE().equals(Opcode.BEQ) && firstValue==secondValue) {
+			pc = instruction.getPc() + instruction.getIMM();
+			emptyInstructionsQueue();
+		}
+	}
+
+	/**
+	 * This method fulfill the reservation station with the required values.
 	 * @param reservationStation
 	 * @param instruction
 	 * @param tmpExecuteList
@@ -410,7 +409,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
+	 * This method fulfill the reservation station with the required values.
 	 * @param reservationStation
 	 * @param instruction
 	 * @param tmpExecuteList
@@ -444,7 +443,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
+	 * This method fulfill the buffer with the required values. 
 	 * @param buffer
 	 * @param instruction
 	 * @param tmpExecuteList
@@ -656,6 +655,55 @@ public class Tomasulo {
 		for (int i = 0; i < 16; i++) {
 			System.out.println("Float Register " + i + ": " + registers.getFloatRegisterValue(i));
 		}
+	}
+	
+	/**
+	 * This is a test method.
+	 */
+	private void printReservationStations() {
+		System.out.println("Reservation Stations: cycle" + this.clock);
+		System.out.println("Name\tOp\tVj\tVk\tQj\tQk\tA\tInstr #");
+		for (LoadBuffer buffer : buffers.getLoadBuffers()) {
+			if (buffer.isBusy()) {
+				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
+						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
+			} else {
+				System.out.println(buffer.getNameOfStation());
+			}
+		}
+		for (StoreBuffer buffer : buffers.getStoreBuffers()) {
+			if (buffer.isBusy()) {
+				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
+						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
+			} else {
+				System.out.println(buffer.getNameOfStation());
+			}
+		}
+		for (AluReservationStation RS : reservationStations.getAluReservationStations()) {
+			if (RS.isBusy()) {
+				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
+						+ RS.getSecondTag() + "\t\t\t");
+			} else {
+				System.out.println(RS.getNameOfStation());
+			}
+		}
+		for (MulOrAddReservationStation RS : reservationStations.getAddReservationStations()) {
+			if (RS.isBusy()) {
+				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
+						+ RS.getSecondTag() + "\t\t\t");
+			} else {
+				System.out.println(RS.getNameOfStation());
+			}
+		}
+		for (MulOrAddReservationStation RS : reservationStations.getMulReservationStations()) {
+			if (RS.isBusy()) {
+				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
+						+ RS.getSecondTag() + "\t\t\t");
+			} else {
+				System.out.println(RS.getNameOfStation());
+			}
+		}
+		
 	}
 
 	// Getters & Setters:
