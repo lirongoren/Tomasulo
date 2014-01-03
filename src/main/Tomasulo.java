@@ -537,6 +537,7 @@ public class Tomasulo {
 				waitingList.remove(instruction);
 			}
 		}
+		writeToCDBList.clear();
 	}
 
 	/**
