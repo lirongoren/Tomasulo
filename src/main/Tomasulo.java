@@ -174,7 +174,7 @@ public class Tomasulo {
 			}
 	
 			else if (instruction.getOPCODE().equals(Opcode.HALT)) {
-				System.out.println("Instruction number " + pc + " is an HALT Operation");
+				System.out.println("Instruction number " + pc + " is a HALT operation");
 				instructionsQueue.poll();
 				fetchingStatus = Global.FINISHED;
 			}
@@ -392,11 +392,21 @@ public class Tomasulo {
 	
 	private void executeInstruction(Instruction instruction) {
 		if (instruction.getExecuteEndCycle() == clock){
-			
-			if (instruction.getOPCODE().equals(Opcode.LD)){
+			switch (instruction.getOPCODE()) {
+			case LD:
 				LoadBuffer loadBuffer = buffers.getLoadBuffer(instruction.getStation());
 				loadBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0());
+				break;
+			case ST:
+				StoreBuffer storeBuffer = buffers.getStoreBuffer(instruction.getStation());
+				storeBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0()); // TODO - check if it's correct
+			case ADD:
+				AluReservationStation RS = (AluReservationStation) reservationStations.getReservationStation(instruction.getStation());
+//				RS.
+			default:
+				break;
 			}
+			
 			
 			//TODO - other instructions types
 			
