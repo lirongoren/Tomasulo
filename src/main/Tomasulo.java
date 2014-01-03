@@ -394,12 +394,12 @@ public class Tomasulo {
 		if (instruction.getExecuteEndCycle() == clock){
 			switch (instruction.getOPCODE()) {
 			case LD:
-				LoadBuffer loadBuffer = buffers.getLoadBuffer(instruction.getStation());
-				loadBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0());
+//				LoadBuffer loadBuffer = buffers.getLoadBuffer(instruction.getStation());
+//				loadBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0());
 				break;
 			case ST:
-				StoreBuffer storeBuffer = buffers.getStoreBuffer(instruction.getStation());
-				storeBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0()); // TODO - check if it's correct
+//				StoreBuffer storeBuffer = buffers.getStoreBuffer(instruction.getStation());
+//				storeBuffer.calculateAddress(instruction.getIMM(), instruction.getSRC0()); // TODO - check if it's correct
 			case ADD:
 				AluReservationStation RS = (AluReservationStation) reservationStations.getReservationStation(instruction.getStation());
 //				RS.
