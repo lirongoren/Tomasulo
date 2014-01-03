@@ -15,6 +15,7 @@ public class MulOrAddReservationStation extends ReservationStation{
 
 	public void setValue1(float value1) {
 		this.value1 = value1;
+		this.firstTag = "";
 	}
 
 	public float getValue2() {
@@ -23,6 +24,7 @@ public class MulOrAddReservationStation extends ReservationStation{
 
 	public void setValue2(float value2) {
 		this.value2 = value2;
+		this.secondTag = "";
 	}
 
 }
