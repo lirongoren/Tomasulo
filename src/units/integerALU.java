@@ -10,8 +10,8 @@ public class integerALU extends Unit {
 		this(0);
 	}
 	
-	public void execute() {
-		// TODO - implement
+	static public int execute(int input1, int input2) {
+		return input1 + input2;
 	}
 
 }

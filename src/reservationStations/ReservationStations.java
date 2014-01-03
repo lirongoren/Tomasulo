@@ -105,18 +105,18 @@ public class ReservationStations {
 		}
 		for (MulOrAddReservationStation RS : mulReservationStations) {
 			if (RS.getFirstTag().equals(station)) {
-				RS.setValue1((int) object);
+				RS.setValue1((float) object);
 			}
 			if (RS.getSecondTag().equals(station)) {
-				RS.setValue2((int) object);
+				RS.setValue2((float) object);
 			}
 		}
 		for (MulOrAddReservationStation RS : addReservationStations) {
 			if (RS.getFirstTag().equals(station)) {
-				RS.setValue1((int) object);
+				RS.setValue1((float) object);
 			}
 			if (RS.getSecondTag().equals(station)) {
-				RS.setValue2((int) object);
+				RS.setValue2((float) object);
 			}
 		}
 	}

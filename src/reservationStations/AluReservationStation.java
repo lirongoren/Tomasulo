@@ -9,7 +9,7 @@ public class AluReservationStation extends ReservationStation {
 		super(i, name);	
 	}
 		
-	public float getValue1() {
+	public int getValue1() {
 		return value1;
 	}
 
@@ -18,7 +18,7 @@ public class AluReservationStation extends ReservationStation {
 		this.firstTag = "";
 	}
 
-	public float getValue2() {
+	public int getValue2() {
 		return value2;
 	}
 

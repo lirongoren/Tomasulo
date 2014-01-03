@@ -10,8 +10,8 @@ public class FPMul extends Unit {
 		this (0);
 	}
 	
-	public void execute() {
-		// TODO - implement
+	static public float execute(float input1, float input2) {
+		return input1 * input2;
 	}
 
 }

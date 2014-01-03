@@ -1,6 +1,10 @@
 package main;
 
+import reservationStations.AluReservationStation;
+import reservationStations.MulOrAddReservationStation;
 import reservationStations.ReservationStations;
+import units.FPAddSub;
+import units.integerALU;
 import buffers.Buffers;
 import exceptions.UnknownOpcodeException;
 
@@ -137,11 +141,11 @@ public class Instruction {
 		this.result = result;
 	}
 
-	public void execute(int clock) {
-		if (clock == executeEndCycle){
-			// TODO - implement
-		}
-	}
+//	public void execute(int clock) {
+//		if (clock == executeEndCycle){
+//			// TODO - implement
+//		}
+//	}
 
 	/**
 	 * 
@@ -275,4 +279,5 @@ public class Instruction {
 		}
 		return false;
 	}
+	
 }
