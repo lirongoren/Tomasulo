@@ -158,6 +158,13 @@ public class Tomasulo {
 		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
 		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
 
+		for (Instruction instruction : waitingList) {
+			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
+				executeList.add(instruction);
+				waitingList.remove(instruction);
+			}
+		}
+		
 		fetchInstruction();
 		Instruction instruction = instructionsQueue.peek();
 		if (instruction != null) {
@@ -167,14 +174,18 @@ public class Tomasulo {
 				instructionsQueue.poll();
 			}
 		}
-
-		execute(tmpWriteToCDBList);
-		writeToCDB();
+		
+		if (!executeList.isEmpty()){
+			execute(tmpWriteToCDBList);
+		}
+		if (!writeToCDBList.isEmpty()){
+			writeToCDB();
+		}
 
 		executeList.addAll(tmpExecuteList);
 		writeToCDBList.addAll(tmpWriteToCDBList);
 
-		if (executeList.isEmpty() && writeToCDBList.isEmpty()) {
+		if (instructionsQueue.isEmpty() && executeList.isEmpty() && writeToCDBList.isEmpty()) {
 			globalStatus = Global.FINISHED;
 		}
 	}
@@ -418,15 +429,16 @@ public class Tomasulo {
 			if (instruction.getExecuteStartCycle() < 0) {
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
-				instruction.setExecuteEndCycle(clock, getDelay(instruction) - 1);
+				instruction.setExecuteEndCycle(clock, getDelay(instruction) - 1);	
+			} 
+			else if (instruction.getExecuteEndCycle() == clock) {
 				executeInstruction(instruction);
-			} else if (instruction.getExecuteEndCycle() == clock) {
+				
+				
 				/* the instruction execution has ended */
-				if (instruction.getOPCODE() != Opcode.ST) { // no need to write
-															// to CDB in store
-															// instructions
-					tmpWriteToCDBList.add(instruction);
+				if (instruction.getOPCODE() != Opcode.ST) { // no need to write to CDB in store instructions
 				}
+				tmpWriteToCDBList.add(instruction);
 				executeList.remove(instruction);
 				count--;
 			}
@@ -531,12 +543,7 @@ public class Tomasulo {
 			buffers.updateTags(instruction.getStation(), instruction.getResult());
 			registers.updateTags(instruction.getStation(), instruction.getResult());
 		}
-		for (Instruction instruction : waitingList) {
-			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
-				executeList.add(instruction);
-				waitingList.remove(instruction);
-			}
-		}
+		
 		writeToCDBList.clear();
 	}
 
