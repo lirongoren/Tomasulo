@@ -435,57 +435,64 @@ public class Tomasulo {
 	}
 
 	private void executeInstruction(Instruction instruction) {
-		if (instruction.getExecuteEndCycle() == clock) {
-			float float_input1, float_input2;
-			int int_input1, int_input2;
-			switch (instruction.getOPCODE()) {
-			case LD:
-				LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
-				registers.setFloatRegisterValue(instruction.getDST(), memory.load(load_buffer.getAddress()));
-			case ST:
-				StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
-				memory.store(store_buffer.getAddress(), (int) registers.getFloatRegisterValue(instruction.getSRC1()));
-			case ADD:
-				int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				int_input2 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-				instruction.setResult((int) integerALU.execute(int_input1, int_input2));
-			case ADDI:
-				int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				int_input2 = instruction.getIMM();
-				instruction.setResult((int) integerALU.execute(int_input1, int_input2));
-			case SUB:
-				int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				int_input2 = -((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-				instruction.setResult((int) integerALU.execute(int_input1, int_input2));
-			case SUBI:
-				int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				int_input2 = -instruction.getIMM();
-				instruction.setResult((int) integerALU.execute(int_input1, int_input2));
-			case ADD_S:
-				float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-				instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
-			case SUB_S:
-				float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				float_input2 = -((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-				instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
-			case MULT_S:
-				float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
-				float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-				instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
-			case JUMP:
-			case BEQ:
-			case BNE:
-			case HALT:
-			default:
-				break;
-			}
-
-			// TODO - other instructions types
-
-			// Important - store has no writeToCDB. it ends after the execute.
-
+		float float_input1, float_input2;
+		int int_input1, int_input2;
+		switch (instruction.getOPCODE()) {
+		case LD:
+			LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
+			registers.setFloatRegisterValue(instruction.getDST(), memory.load(load_buffer.getAddress()));
+			instruction.setResult(registers.getFloatRegisterValue(instruction.getDST()));
+			break;
+		case ST:
+			StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
+			memory.store(store_buffer.getAddress(), (int) registers.getFloatRegisterValue(instruction.getSRC1()));
+			break;
+		case ADD:
+			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			int_input2 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
+			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			break;
+		case ADDI:
+			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			int_input2 = instruction.getIMM();
+			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			break;
+		case SUB:
+			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			int_input2 = -((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
+			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			break;
+		case SUBI:
+			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			int_input2 = -instruction.getIMM();
+			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			break;
+		case ADD_S:
+			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
+			instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
+			break;
+		case SUB_S:
+			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			float_input2 = -((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
+			instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
+			break;
+		case MULT_S:
+			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
+			float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
+			instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
+			break;
+		case JUMP:
+		case BEQ:
+		case BNE:
+		case HALT:
+		default:
+			break;
 		}
+
+		// TODO - other instructions types
+
+		// Important - store has no writeToCDB. it ends after the execute.
 
 	}
 
