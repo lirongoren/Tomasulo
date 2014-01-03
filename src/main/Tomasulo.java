@@ -157,14 +157,12 @@ public class Tomasulo {
 	public void step() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
 		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
 		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
-
-		for (Instruction instruction : waitingList) {
-			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
-				executeList.add(instruction);
-				waitingList.remove(instruction);
-			}
-		}
+		clock++;
 		
+		if (!waitingList.isEmpty()){
+			handleWaitingList();
+		}
+			
 		fetchInstruction();
 		Instruction instruction = instructionsQueue.peek();
 		if (instruction != null) {
@@ -185,9 +183,26 @@ public class Tomasulo {
 		executeList.addAll(tmpExecuteList);
 		writeToCDBList.addAll(tmpWriteToCDBList);
 
-		if (instructionsQueue.isEmpty() && executeList.isEmpty() && writeToCDBList.isEmpty()) {
+		if (waitingList.isEmpty() && instructionsQueue.isEmpty() && executeList.isEmpty() && writeToCDBList.isEmpty()) {
 			globalStatus = Global.FINISHED;
 		}
+	}
+	
+	/**
+	 * 
+	 */
+	private void handleWaitingList() {
+		ArrayList<Instruction> tmpRemovedWaitingList = new ArrayList<Instruction>();
+		for (Instruction instruction : waitingList) {
+			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
+				executeList.add(instruction);
+				tmpRemovedWaitingList.add(instruction);
+			}
+		}
+		if (!tmpRemovedWaitingList.isEmpty()){
+			waitingList.removeAll(tmpRemovedWaitingList);
+		}
+		
 	}
 
 	/**
@@ -212,7 +227,6 @@ public class Tomasulo {
 			}
 			instructionsQueue.add(inst);
 			instructionsStaticQueue.add(inst);
-			clock++;
 		}
 	}
 
@@ -432,21 +446,24 @@ public class Tomasulo {
 				instruction.setExecuteEndCycle(clock, getDelay(instruction) - 1);	
 			} 
 			else if (instruction.getExecuteEndCycle() == clock) {
-				executeInstruction(instruction);
 				
-				
+				boolean executed = executeInstruction(instruction);
+								
 				/* the instruction execution has ended */
-				if (instruction.getOPCODE() != Opcode.ST) { // no need to write to CDB in store instructions
+//				if (instruction.getOPCODE() != Opcode.ST) { // no need to write to CDB in store instructions
+//				}
+				
+				if (executed==true){
+					tmpWriteToCDBList.add(instruction);
+					executeList.remove(instruction);
+					count--;
 				}
-				tmpWriteToCDBList.add(instruction);
-				executeList.remove(instruction);
-				count--;
 			}
 			count++;
 		}
 	}
 
-	private void executeInstruction(Instruction instruction) {
+	private boolean executeInstruction(Instruction instruction) {
 		float float_input1, float_input2;
 		int int_input1, int_input2;
 		switch (instruction.getOPCODE()) {
@@ -505,6 +522,7 @@ public class Tomasulo {
 			break;
 		}
 
+		return false;
 		// TODO - other instructions types
 
 		// Important - store has no writeToCDB. it ends after the execute.
