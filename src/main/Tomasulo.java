@@ -1,5 +1,6 @@
 package main;
 
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
@@ -75,8 +76,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method creates the store & buffers.
-	 * In any case of invalid input (non value / value=zero) an exception is thrown.
+	 * This method creates the store & buffers. In any case of invalid input
+	 * (non value / value=zero) an exception is thrown.
+	 * 
 	 * @param configuration
 	 * @throws MissingLoadStoreBuffers
 	 */
@@ -96,8 +98,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method creates the reservation stations.
-	 * In any case of invalid input (non value / value=zero) an exception is thrown.
+	 * This method creates the reservation stations. In any case of invalid
+	 * input (non value / value=zero) an exception is thrown.
+	 * 
 	 * @param configuration
 	 * @throws MisssingReservationsException
 	 */
@@ -121,8 +124,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method creates the execute units.
-	 * In any case of value=0 on the cfg.txt we will create a unit with latency=0.
+	 * This method creates the execute units. In any case of value=0 on the
+	 * cfg.txt we will create a unit with latency=0.
+	 * 
 	 * @param configuration
 	 */
 	private void initializeUnits(Map<String, Integer> configuration) {
@@ -153,6 +157,7 @@ public class Tomasulo {
 
 	/**
 	 * This method ...
+	 * 
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
@@ -160,24 +165,24 @@ public class Tomasulo {
 		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
 		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
 		fetchInstruction();
-			
-		if (!waitingList.isEmpty()){
+
+		if (!waitingList.isEmpty()) {
 			handleWaitingList();
 		}
-				
+
 		Instruction instruction = instructionsQueue.peek();
 		if (instruction != null) {
 			if (!instruction.getOPCODE().equals(Opcode.HALT)) {
 				issue(tmpExecuteList);
-			} else{
+			} else {
 				instructionsQueue.poll();
 			}
 		}
-		
-		if (!executeList.isEmpty()){
+
+		if (!executeList.isEmpty()) {
 			execute(tmpWriteToCDBList);
 		}
-		if (!writeToCDBList.isEmpty()){
+		if (!writeToCDBList.isEmpty()) {
 			writeToCDB();
 		}
 
@@ -187,8 +192,51 @@ public class Tomasulo {
 		if (waitingList.isEmpty() && instructionsQueue.isEmpty() && executeList.isEmpty() && writeToCDBList.isEmpty()) {
 			globalStatus = Global.FINISHED;
 		}
+
+		System.out.println("Reservation Stations: cycle" + this.clock);
+		System.out.println("Name\tOp\tVj\tVk\tQj\tQk\tA\tInstr #");
+		for (LoadBuffer buffer : buffers.getLoadBuffers()) {
+			if (buffer.isBusy()) {
+				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
+						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
+			} else {
+				System.out.println(buffer.getNameOfStation());
+			}
+		}
+		for (StoreBuffer buffer : buffers.getStoreBuffers()) {
+			if (buffer.isBusy()) {
+				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
+						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
+			} else {
+				System.out.println(buffer.getNameOfStation());
+			}
+		}
+		for (AluReservationStation RS : reservationStations.getAluReservationStations()) {
+			if (RS.isBusy()) {
+				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
+						+ RS.getSecondTag() + "\t\t\t");
+			} else {
+				System.out.println(RS.getNameOfStation());
+			}
+		}
+		for (MulOrAddReservationStation RS : reservationStations.getAddReservationStations()) {
+			if (RS.isBusy()) {
+				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
+						+ RS.getSecondTag() + "\t\t\t");
+			} else {
+				System.out.println(RS.getNameOfStation());
+			}
+		}
+		for (MulOrAddReservationStation RS : reservationStations.getMulReservationStations()) {
+			if (RS.isBusy()) {
+				System.out.println(RS.getNameOfStation() + "\t" + RS.getOpcode().toString() + "\t" + RS.getValue1() + "\t" + RS.getValue2() + "\t" + RS.getFirstTag() + "\t"
+						+ RS.getSecondTag() + "\t\t\t");
+			} else {
+				System.out.println(RS.getNameOfStation());
+			}
+		}
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -200,10 +248,10 @@ public class Tomasulo {
 				tmpRemovedWaitingList.add(instruction);
 			}
 		}
-		if (!tmpRemovedWaitingList.isEmpty()){
+		if (!tmpRemovedWaitingList.isEmpty()) {
 			waitingList.removeAll(tmpRemovedWaitingList);
 		}
-		
+
 	}
 
 	/**
@@ -221,8 +269,7 @@ public class Tomasulo {
 		if (pc == memory.getMaxWords() - 1) {
 			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 			fetchingStatus = Global.FINISHED;
-		} 
-		else if (fetchingStatus == Global.UNFINISHED) {
+		} else if (fetchingStatus == Global.UNFINISHED) {
 			Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
 			if (inst.getOPCODE().equals(Opcode.HALT)) {
 				fetchingStatus = Global.FINISHED;
@@ -446,17 +493,17 @@ public class Tomasulo {
 			if (instruction.getExecuteStartCycle() < 0) {
 				/* the instruction execution hasn't started */
 				instruction.setExecuteStartCycle(clock);
-				instruction.setExecuteEndCycle(clock, getDelay(instruction) - 1);	
-			} 
-			else if (instruction.getExecuteEndCycle() == clock) {
-				
+				instruction.setExecuteEndCycle(clock, getDelay(instruction) - 1);
+			} else if (instruction.getExecuteEndCycle() == clock) {
+
 				boolean executed = executeInstruction(instruction);
-								
+
 				/* the instruction execution has ended */
-//				if (instruction.getOPCODE() != Opcode.ST) { // no need to write to CDB in store instructions
-//				}
-				
-				if (executed==true){
+				// if (instruction.getOPCODE() != Opcode.ST) { // no need to
+				// write to CDB in store instructions
+				// }
+
+				if (executed == true) {
 					tmpWriteToCDBList.add(instruction);
 					executeList.remove(instruction);
 					count--;
@@ -472,10 +519,6 @@ public class Tomasulo {
 		switch (instruction.getOPCODE()) {
 		case LD:
 			LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
-			
-//			registers.setFloatRegisterValue(instruction.getDST(), memory.load(load_buffer.getAddress()));
-//			instruction.setResult(registers.getFloatRegisterValue(instruction.getDST()));
-			
 			instruction.setResult(memory.load(load_buffer.getAddress()));
 			break;
 		case ST:
@@ -567,7 +610,7 @@ public class Tomasulo {
 			buffers.updateTags(instruction.getStation(), instruction.getResult());
 			registers.updateTags(instruction.getStation(), instruction.getResult());
 		}
-		
+
 		writeToCDBList.clear();
 	}
 

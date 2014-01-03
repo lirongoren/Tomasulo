@@ -31,6 +31,10 @@ public class Buffers {
 		}
 	}
 	
+	public Map<String, LoadStoreBuffer> getBuffers() {
+		return buffers;
+	}
+
 	public LoadBuffer getFreeLoadBuffer() {
 		for (LoadBuffer buffer: loadBuffers) {
 			if (!buffer.isBusy()) {
@@ -90,4 +94,14 @@ public class Buffers {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	public List<StoreBuffer> getStoreBuffers() {
+		return storeBuffers;
+	}
+
+	public List<LoadBuffer> getLoadBuffers() {
+		return loadBuffers;
+	}
+	
+	
 }

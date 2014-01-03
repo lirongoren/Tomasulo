@@ -120,4 +120,18 @@ public class ReservationStations {
 			}
 		}
 	}
+
+	public List<MulOrAddReservationStation> getMulReservationStations() {
+		return mulReservationStations;
+	}
+
+	public List<MulOrAddReservationStation> getAddReservationStations() {
+		return addReservationStations;
+	}
+
+	public List<AluReservationStation> getAluReservationStations() {
+		return aluReservationStations;
+	}
+
+	
 }
