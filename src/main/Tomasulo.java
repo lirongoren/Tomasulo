@@ -19,6 +19,7 @@ import buffers.LoadStoreBuffer;
 import buffers.StoreBuffer;
 import exceptions.MissingNumberOfLoadStoreBuffersException;
 import exceptions.MissingNumberOfReservationStationsException;
+import exceptions.ProgramCounterOutOfBoundException;
 import exceptions.UnknownOpcodeException;
 
 public class Tomasulo {
@@ -156,8 +157,9 @@ public class Tomasulo {
 	/**
 	 * 
 	 * @throws UnknownOpcodeException
+	 * @throws ProgramCounterOutOfBoundException 
 	 */
-	public void step() throws UnknownOpcodeException {
+	public void step() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
 		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
 		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
 		
@@ -202,8 +204,12 @@ public class Tomasulo {
 	 * Fetching an instruction from the memory to the Instruction Queue takes one clock cycle.
 	 * @return
 	 * @throws UnknownOpcodeException
+	 * @throws ProgramCounterOutOfBoundException 
 	 */
-	private void fetchInstruction() throws UnknownOpcodeException {
+	private void fetchInstruction() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
+		if (pc<0 || pc>1023){
+			throw new ProgramCounterOutOfBoundException();
+		}
 		if (pc == memory.getMaxWords() - 1) {
 			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 			fetchingStatus = Global.FINISHED;
@@ -530,8 +536,9 @@ public class Tomasulo {
 	 * This is a test method.
 	 * 
 	 * @throws UnknownOpcodeException
+	 * @throws ProgramCounterOutOfBoundException 
 	 */
-	public void printInstructions() throws UnknownOpcodeException {
+	public void printInstructions() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
 		System.out.println("Input Instructions:\n");
 		int j = 0;
 		String binStr;
