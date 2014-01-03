@@ -75,7 +75,8 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
+	 * This method creates the store & buffers.
+	 * In any case of invalid input (non value / value=zero) an exception is thrown.
 	 * @param configuration
 	 * @throws MissingLoadStoreBuffers
 	 */
@@ -95,7 +96,8 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
+	 * This method creates the reservation stations.
+	 * In any case of invalid input (non value / value=zero) an exception is thrown.
 	 * @param configuration
 	 * @throws MisssingReservationsException
 	 */
@@ -119,8 +121,8 @@ public class Tomasulo {
 	}
 
 	/**
-	 * Here we can keep executing with zero values in configuration file.
-	 * 
+	 * This method creates the execute units.
+	 * In any case of value=0 on the cfg.txt we will create a unit with latency=0.
 	 * @param configuration
 	 */
 	private void initializeUnits(Map<String, Integer> configuration) {
@@ -150,25 +152,24 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
+	 * This method ...
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
 	public void step() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
 		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
 		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
-		clock++;
-		
+		fetchInstruction();
+			
 		if (!waitingList.isEmpty()){
 			handleWaitingList();
 		}
-			
-		fetchInstruction();
+				
 		Instruction instruction = instructionsQueue.peek();
 		if (instruction != null) {
 			if (!instruction.getOPCODE().equals(Opcode.HALT)) {
 				issue(tmpExecuteList);
-			} else if (instruction.getOPCODE().equals(Opcode.HALT)) {
+			} else{
 				instructionsQueue.poll();
 			}
 		}
@@ -220,7 +221,8 @@ public class Tomasulo {
 		if (pc == memory.getMaxWords() - 1) {
 			System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 			fetchingStatus = Global.FINISHED;
-		} else if (fetchingStatus == Global.UNFINISHED) {
+		} 
+		else if (fetchingStatus == Global.UNFINISHED) {
 			Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
 			if (inst.getOPCODE().equals(Opcode.HALT)) {
 				fetchingStatus = Global.FINISHED;
@@ -228,6 +230,7 @@ public class Tomasulo {
 			instructionsQueue.add(inst);
 			instructionsStaticQueue.add(inst);
 		}
+		clock++;
 	}
 
 	/**
