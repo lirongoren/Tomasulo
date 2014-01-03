@@ -209,7 +209,7 @@ public class Tomasulo {
 			fetchingStatus = Global.FINISHED;
 		}
 		else if (fetchingStatus==Global.UNFINISHED){
-			Instruction inst = new Instruction(memory.loadAsBinaryString(pc++));
+			Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
 			if (inst.getOPCODE().equals(Opcode.HALT)){
 				fetchingStatus = Global.FINISHED;
 			}
@@ -222,7 +222,6 @@ public class Tomasulo {
 	/**
 	 * For JUMP instructions.
 	 */
-	@SuppressWarnings("unused")
 	private void emptyInstructionsQueue() {
 		instructionsQueue.clear();
 	}
@@ -303,18 +302,14 @@ public class Tomasulo {
 		} 
 				
 		else if (instruction.getOPCODE().equals(Opcode.JUMP)) {
-			// TODO - implement
+			pc = pc + instruction.getIMM();
+			emptyInstructionsQueue();			
 		} 
 		
 		else if (instruction.getOPCODE().equals(Opcode.BNE)	|| instruction.getOPCODE().equals(Opcode.BEQ)) {
 			// TODO - implement
 		}
-		
-		else {
-			// TODO - implement
-		}
-
-		
+			
 	}
 	
 	/**
@@ -546,9 +541,9 @@ public class Tomasulo {
 		
 		for (Instruction inst : instructionsQueue) {
 			System.out.println("Instruction number " + j + ":");
-			binStr = memory.loadAsBinaryString(j++);
+			binStr = memory.loadAsBinaryString(j);
 			
-			inst = new Instruction(binStr);
+			inst = new Instruction(binStr, j++);
 
 			System.out.println("OPCODE: " + inst.getOPCODE());
 			System.out.println("DST: " + inst.getDST());

@@ -37,6 +37,7 @@ public class Register {
 		VALUE("value"),
 		TAG("tag");
 
+		@SuppressWarnings("unused")
 		private String status;
 
 		private Status(String status) {

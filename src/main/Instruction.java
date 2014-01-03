@@ -9,6 +9,7 @@ public class Instruction {
 	private String binaryInst = "";
 	private String station = "";
 	
+	private int pc = -1;
 	private int issueCycle = -1;
 	private int executeStartCycle = -1;
 	private int executeEndCycle = -1;
@@ -22,8 +23,9 @@ public class Instruction {
 
 	Object result = null; /* Integer or Float */
 
-	public Instruction(String binaryInst) throws UnknownOpcodeException {
+	public Instruction(String binaryInst, int pc) throws UnknownOpcodeException {
 		this.binaryInst = binaryInst;
+		this.pc = pc;
 		OPCODE = createOpcode(getOpcodeValue());
 		DST = getDestinationValue();
 		SRC0 = getFirstSourceValue();
@@ -31,6 +33,14 @@ public class Instruction {
 		IMM = getImmValue();
 	}
 
+	public int getPc() {
+		return pc;
+	}
+
+	public void setPc(int pc) {
+		this.pc = pc;
+	}
+	
 	public String getBinaryInst() {
 		return binaryInst;
 	}
