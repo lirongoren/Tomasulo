@@ -522,7 +522,7 @@ public class Tomasulo {
 			break;
 		}
 
-		return false;
+		return true;
 		// TODO - other instructions types
 
 		// Important - store has no writeToCDB. it ends after the execute.
