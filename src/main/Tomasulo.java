@@ -308,7 +308,7 @@ public class Tomasulo {
 		} 
 				
 		else if (instruction.getOPCODE().equals(Opcode.JUMP)) {
-			pc = pc + instruction.getIMM();
+			pc = instruction.getPc() + instruction.getIMM();
 			emptyInstructionsQueue();			
 		} 
 		
