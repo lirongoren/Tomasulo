@@ -10,6 +10,8 @@ public class Main {
 		Parser parser = new Parser(args[0], args[1]);
 		Tomasulo tomasulo = new Tomasulo(parser.getMemory(), parser.getConfiguration());
 
+//		tomasulo.printInstructions();
+		
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
 		}
@@ -19,7 +21,7 @@ public class Main {
 		parser.createIntRegistersOutputFile(tomasulo.getRegisters());
 		parser.createTraceOutputFile(tomasulo.getInstructionsStaticQueue());
 		
-		tomasulo.printInstructions();
+//		tomasulo.printInstructions();
 		tomasulo.printRegistersValues();	
 	}
 	

@@ -85,4 +85,9 @@ public class Buffers {
 			}
 		}
 	}
+
+	public boolean isThereAddressCollision() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
