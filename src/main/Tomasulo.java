@@ -279,9 +279,7 @@ public class Tomasulo {
 	public void issue(ArrayList<Instruction> tmpExecuteList) {
 		Instruction instruction = instructionsQueue.peek();
 
-		if (instruction.getIssueCycle() == -1) {
-			instruction.setIssueCycle(clock);
-		}
+		instruction.setIssueCycle(clock);
 
 		if (instruction.getOPCODE().equals(Opcode.LD)) {
 			if (buffers.isThereFreeLoadBuffer()) {
