@@ -12,7 +12,7 @@ public class Registers {
 	public Registers() {
 		int_registers = new IntRegister[16];
 		for (int i = 0; i < 16; i++) {
-			int_registers[i] = new IntRegister(i);
+			int_registers[i] = new IntRegister(0);
 		}
 		float_registers = new FloatRegister[16];
 		for (int i = 0; i < 16; i++) {

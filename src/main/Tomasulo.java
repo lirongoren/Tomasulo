@@ -518,16 +518,16 @@ public class Tomasulo {
 		case ADDI:
 		case SUB:
 		case SUBI:
-			numOfCycles = this.alu_unit.getNumOfInstructionsWaiting() * this.alu_unit.getDelay();
+			numOfCycles = this.alu_unit.getNumOfInstructionsWaiting();
 			this.alu_unit.increaseNumOfInstructionsWaiting();
 			break;
 		case ADD_S:
 		case SUB_S:
-			numOfCycles = this.FP_add_sub_unit.getNumOfInstructionsWaiting() * this.alu_unit.getDelay();
+			numOfCycles = this.FP_add_sub_unit.getNumOfInstructionsWaiting();
 			this.FP_add_sub_unit.increaseNumOfInstructionsWaiting();
 			break;
 		case MULT_S:
-			numOfCycles = this.FP_mult_unit.getNumOfInstructionsWaiting() * this.alu_unit.getDelay();
+			numOfCycles = this.FP_mult_unit.getNumOfInstructionsWaiting();
 			this.FP_mult_unit.increaseNumOfInstructionsWaiting();
 			break;
 		case LD:
