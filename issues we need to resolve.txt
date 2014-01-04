@@ -1,0 +1,2 @@
+1. make sure there aren't a few accesses to the memory at the same address at the same time.
+2. add in the documentation cases of aliasing: what happens if we have load and then store, and the store happens first and then the load is not updated. need to check if our code covers such a case.

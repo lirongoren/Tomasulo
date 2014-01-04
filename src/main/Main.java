@@ -8,11 +8,11 @@ public class Main {
 	public static void main(String[] args) throws UnknownOpcodeException, IOException,
 	MissingNumberOfReservationStationsException, MissingNumberOfLoadStoreBuffersException, ProgramCounterOutOfBoundException {
 
-		Parser parser = new Parser(args[0], args[1]);
+		Parser parser = new Parser(args[1], args[0]);
 		Tomasulo tomasulo = new Tomasulo(parser.getMemory(), parser.getConfiguration());
 
-//		tomasulo.printInstructions();
-		
+		tomasulo.printInstructions();
+		System.exit(1);
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
 		}

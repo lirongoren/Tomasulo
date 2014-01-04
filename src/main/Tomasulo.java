@@ -657,7 +657,8 @@ public class Tomasulo {
 	 * @throws ProgramCounterOutOfBoundException
 	 */
 	public void printInstructions() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
-		System.out.println("Input Instructions:\n");
+		System.out.println("Input Instructions:");
+		System.out.println("inst#\t|OPCODE\t|DST\t|SRC0\t|SRC1\t|IMM");
 		int j = 0;
 		String binStr;
 		while (fetchingStatus == globalStatus) {
@@ -665,17 +666,9 @@ public class Tomasulo {
 		}
 
 		for (Instruction inst : instructionsQueue) {
-			System.out.println("Instruction number " + j + ":");
 			binStr = memory.loadAsBinaryString(j);
-
 			inst = new Instruction(binStr, j++);
-
-			System.out.println("OPCODE: " + inst.getOPCODE());
-			System.out.println("DST: " + inst.getDST());
-			System.out.println("SRC0: " + inst.getSRC0());
-			System.out.println("SRC1: " + inst.getSRC1());
-			System.out.println("IMM: " + inst.getIMM());
-			System.out.println();
+			System.out.println(j + "\t|" + inst.getOPCODE() + "\t|" + inst.getDST() + "\t|" + inst.getSRC0() + "\t|" + inst.getSRC1() + "\t|" + inst.getIMM());
 		}
 	}
 
