@@ -208,7 +208,7 @@ public class Tomasulo {
 					LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
 					load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
 				}
-				if (instruction.getOPCODE() == Opcode.ST) {
+				else if (instruction.getOPCODE() == Opcode.ST) {
 					StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
 					store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
 				}
@@ -555,6 +555,9 @@ public class Tomasulo {
 				executeList.remove(instruction);
 				count--;
 			}
+			else if (instruction.getExecuteStartCycle() + 1 == clock) {
+				updateUnit(instruction);
+			}
 			count++;
 		}
 	}
@@ -592,60 +595,84 @@ public class Tomasulo {
 		return numOfCycles;
 	}
 
-	private boolean executeInstruction(Instruction instruction) {
+	private void executeInstruction(Instruction instruction) {
 		float float_input1, float_input2;
 		int int_input1, int_input2;
 		switch (instruction.getOPCODE()) {
 		case LD:
 			LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
 			instruction.setResult(memory.load(load_buffer.getAddress()));
-			this.load_store_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ST:
 			StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
 			memory.store(store_buffer.getAddress(), (int) registers.getFloatRegisterValue(instruction.getSRC1()));
-			this.load_store_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ADD:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
 			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
-			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ADDI:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = instruction.getIMM();
 			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
-			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case SUB:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = -((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
 			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
-			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case SUBI:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = -instruction.getIMM();
 			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
-			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ADD_S:
 			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
 			instruction.setResult((float) this.FP_add_sub_unit.execute(float_input1, float_input2));
-			this.FP_add_sub_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case SUB_S:
 			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			float_input2 = -((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
 			instruction.setResult((float) this.FP_add_sub_unit.execute(float_input1, float_input2));
-			this.FP_add_sub_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case MULT_S:
 			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
 			instruction.setResult((float) this.FP_mult_unit.execute(float_input1, float_input2));
+			break;
+		case JUMP:
+		case BEQ:
+		case BNE:
+		case HALT:
+		default:
+			break;
+		}
+
+		// TODO - other instructions types
+
+		// Important - store has no writeToCDB. it ends after the execute.
+
+	}
+	
+	private void updateUnit(Instruction instruction) {
+		switch (instruction.getOPCODE()) {
+		case LD:
+		case ST:
+			this.load_store_unit.decreaseNumOfInstructionsWaiting();
+			break;
+		case ADD:
+		case ADDI:
+		case SUB:
+		case SUBI:
+			this.alu_unit.decreaseNumOfInstructionsWaiting();
+			break;
+		case ADD_S:
+		case SUB_S:
+			this.FP_add_sub_unit.decreaseNumOfInstructionsWaiting();
+			break;
+		case MULT_S:
 			this.FP_mult_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case JUMP:
@@ -656,7 +683,6 @@ public class Tomasulo {
 			break;
 		}
 
-		return true;
 		// TODO - other instructions types
 
 		// Important - store has no writeToCDB. it ends after the execute.
