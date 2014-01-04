@@ -101,6 +101,9 @@ public class Parser {
 		String hexInst;
 		
 		for(Instruction inst : instructions_queue){
+			if (inst.getIssueCycle() < 0) {
+				continue;
+			}
 			String line = "";
 			int decInst = (int) Long.parseLong(inst.getBinaryInst(), 2);
 			hexInst = Integer.toHexString(decInst);

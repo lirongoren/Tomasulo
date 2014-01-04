@@ -338,6 +338,7 @@ public class Tomasulo {
 		else if (instruction.getOPCODE().equals(Opcode.BNE) || instruction.getOPCODE().equals(Opcode.BEQ)) {
 			branchResolution(instruction);
 		}
+
 	}
 
 	/**
@@ -531,12 +532,13 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method iterate over the execList:
-	 * 1. if the instruction.exec_start == -1: update exec_start & exec_end 
-	 *    after calculating the NextAvailableCycle of the appropriate unit.
-	 *  
-	 * 2. else if exec_end == clock, we will call executeInstruction method, remove the instruction
-	 * 	  from the executing list and add it to the writeToCDBList.
+	 * This method iterate over the execList: 1. if the instruction.exec_start
+	 * == -1: update exec_start & exec_end after calculating the
+	 * NextAvailableCycle of the appropriate unit.
+	 * 
+	 * 2. else if exec_end == clock, we will call executeInstruction method,
+	 * remove the instruction from the executing list and add it to the
+	 * writeToCDBList.
 	 */
 	public void execute(ArrayList<Instruction> tmpWriteToCDBList) {
 		int count = 0;

@@ -15,6 +15,7 @@ public class Main {
 		
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
+			tomasulo.printRegistersValues();
 		}
 		
 		parser.createMemoryOutputFile();
