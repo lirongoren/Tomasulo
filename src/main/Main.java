@@ -12,7 +12,7 @@ public class Main {
 		Tomasulo tomasulo = new Tomasulo(parser.getMemory(), parser.getConfiguration());
 
 		tomasulo.printInstructions();
-		System.exit(1);
+		
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
 		}
