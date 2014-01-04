@@ -209,7 +209,7 @@ public class Instruction {
 	public int getImmValue() {
 		int sign = Integer.parseInt(binaryInst.substring(16, 17), 2);
 		int num = Integer.parseInt(binaryInst.substring(17, 32), 2);
-		return (-1 * sign * ((int) Math.pow(2, 15) - 1)) + num;
+		return (-1 * sign * ((int) Math.pow(2, 15))) + num;
 	}
 
 	public int getSecondSourceValue() {
