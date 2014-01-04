@@ -132,6 +132,13 @@ public class ReservationStations {
 	public List<AluReservationStation> getAluReservationStations() {
 		return aluReservationStations;
 	}
+	
+	public void freeReservationStation(String station) {
+		ReservationStation RS = reservationStationsMap.get(station);
+		if (RS.isReady()) {
+			RS.free();
+		}
+	}
 
 	
 }

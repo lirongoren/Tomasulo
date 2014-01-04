@@ -141,11 +141,31 @@ public class Instruction {
 		this.result = result;
 	}
 
-//	public void execute(int clock) {
-//		if (clock == executeEndCycle){
-//			// TODO - implement
-//		}
-//	}
+	public void freeStation(ReservationStations reservationStations, Buffers buffers) {
+		switch (OPCODE) {
+		case LD:
+			buffers.getLoadBuffer(station).free();
+			break;
+		case ST:
+			buffers.getStoreBuffer(station).free();
+			break;
+		case ADD:
+		case ADDI:
+		case SUB:
+		case SUBI:
+		case ADD_S:
+		case SUB_S:
+		case MULT_S:
+			reservationStations.getReservationStation(station).free();
+			break;
+		case JUMP:
+		case BEQ:
+		case BNE:
+		case HALT:
+		default:
+			break;
+		}
+	}
 
 	/**
 	 * 

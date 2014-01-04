@@ -204,6 +204,14 @@ public class Tomasulo {
 		ArrayList<Instruction> tmpRemovedWaitingList = new ArrayList<Instruction>();
 		for (Instruction instruction : waitingList) {
 			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
+				if (instruction.getOPCODE() == Opcode.LD) {
+					LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
+					load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
+				}
+				if (instruction.getOPCODE() == Opcode.ST) {
+					StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
+					store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
+				}
 				executeList.add(instruction);
 				tmpRemovedWaitingList.add(instruction);
 			}
@@ -279,7 +287,7 @@ public class Tomasulo {
 		if (instruction.getOPCODE().equals(Opcode.LD)) {
 			if (buffers.isThereFreeLoadBuffer()) {
 				LoadBuffer loadBuffer = buffers.getFreeLoadBuffer();
-				setBufferValues(loadBuffer, instruction, tmpExecuteList);
+				setLoadBufferValues(loadBuffer, instruction, tmpExecuteList);
 				registers.setFloatRegisterTag(instruction.getDST(), loadBuffer.getNameOfStation());
 			} else {
 				// No empty buffer yet. Will try again next cycle.
@@ -289,7 +297,7 @@ public class Tomasulo {
 		else if (instruction.getOPCODE().equals(Opcode.ST)) {
 			if (buffers.isThereFreeStoreBuffer()) {
 				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
-				setBufferValues(storeBuffer, instruction, tmpExecuteList);
+				setStoreBufferValues(storeBuffer, instruction, tmpExecuteList);
 				// No need to set tag of the destination register, as the
 				// destination is the memory.
 			} else {
@@ -455,25 +463,64 @@ public class Tomasulo {
 	 * @param instruction
 	 * @param tmpExecuteList
 	 */
-	private void setBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
+	private void setLoadBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
 		buffer.setOpcode(instruction.getOPCODE());
-		buffer.setValue1(instruction.getIMM());
+		// buffer.setValue1(instruction.getIMM());
 		instruction.setStation(buffer.getNameOfStation());
 
 		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
-			buffer.setValue2(registers.getIntRegisterValue(instruction.getSRC0()));
+			buffer.setValue1(registers.getIntRegisterValue(instruction.getSRC0()));
 
 			// We decided to calculate the effective address at the issue stage:
-			buffer.calculateAddress(instruction.getIMM(), instruction.getSRC0());
+			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
 
 			if (!buffers.isThereAddressCollision()) {
 				tmpExecuteList.add(instructionsQueue.poll());
 			} else {
 				// TODO - handle collision of address in the buffers.
 			}
+
 		} else {
-			buffer.setSecondTag(registers.getIntRegisterTag(instruction.getSRC1()));
+			buffer.setFirstTag(registers.getIntRegisterTag(instruction.getSRC1()));
+			waitingList.add(instructionsQueue.poll());
+		}
+
+	}
+
+	private void setStoreBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
+		buffer.setBusy();
+		buffer.setOpcode(instruction.getOPCODE());
+		instruction.setStation(buffer.getNameOfStation());
+
+		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
+			buffer.setValue1(registers.getIntRegisterValue(instruction.getSRC0()));
+		} else {
+			buffer.setFirstTag(registers.getIntRegisterTag(instruction.getSRC0()));
+		}
+		if (registers.getFloatRegisterStatus(instruction.getSRC1()) == Status.VALUE) {
+			buffer.setValue2(registers.getFloatRegisterValue(instruction.getSRC1()));
+		} else {
+			buffer.setSecondTag(registers.getFloatRegisterTag(instruction.getSRC1()));
+		}
+
+		if (buffer.getFirstTag().isEmpty()) {
+
+			// We decided to calculate the effective address at the issue stage:
+			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
+
+			if (buffer.getSecondTag().isEmpty()) {
+				if (!buffers.isThereAddressCollision()) {
+					tmpExecuteList.add(instructionsQueue.poll());
+				} else {
+					// TODO - handle collision of address in the buffers.
+				}
+
+			} else {
+				waitingList.add(instructionsQueue.poll());
+			}
+
+		} else {
 			waitingList.add(instructionsQueue.poll());
 		}
 
@@ -501,7 +548,8 @@ public class Tomasulo {
 				int nextAvailableCycle = getNextAvailableCycle(instruction);
 				instruction.setExecuteStartCycle(clock + nextAvailableCycle);
 				instruction.setExecuteEndCycle(clock + nextAvailableCycle, getDelay(instruction) - 1);
-			} else if (instruction.getExecuteEndCycle() == clock) {
+			}
+			if (instruction.getExecuteEndCycle() == clock) {
 				executeInstruction(instruction);
 				tmpWriteToCDBList.add(instruction);
 				executeList.remove(instruction);
@@ -645,6 +693,7 @@ public class Tomasulo {
 			reservationStations.updateTags(instruction.getStation(), instruction.getResult());
 			buffers.updateTags(instruction.getStation(), instruction.getResult());
 			registers.updateTags(instruction.getStation(), instruction.getResult());
+			instruction.freeStation(reservationStations, buffers);
 		}
 
 		writeToCDBList.clear();

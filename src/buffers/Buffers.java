@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import reservationStations.ReservationStation;
+
 public class Buffers {
 	
 	private Map<String, LoadStoreBuffer> buffers;
@@ -80,12 +82,15 @@ public class Buffers {
 	public void updateTags(String station, Object object) {
 		for (LoadBuffer buffer : loadBuffers) {
 			if (buffer.getFirstTag().equals(station)) {
-//				buffer.setValue1((int) object); // TODO - implement
+				buffer.setValue1((int) object);
 			}
 		}
 		for (StoreBuffer buffer : storeBuffers) {
 			if (buffer.getFirstTag().equals(station)) {
-//				buffer.setValue1((int) object); // TODO - implement
+				buffer.setValue1((int) object);
+			}
+			if (buffer.getSecondTag().equals(station)) {
+				buffer.setValue2((float) object);
 			}
 		}
 	}
@@ -101,6 +106,13 @@ public class Buffers {
 
 	public List<LoadBuffer> getLoadBuffers() {
 		return loadBuffers;
+	}
+	
+	public void freeBuffer(String station) {
+		LoadStoreBuffer buffer = buffers.get(station);
+		if (buffer.isReady()) {
+			buffer.free();
+		}
 	}
 	
 	

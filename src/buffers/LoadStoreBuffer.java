@@ -5,15 +5,15 @@ import reservationStations.ReservationStation;
 public class LoadStoreBuffer extends ReservationStation{
 	
 	private int address;
-	private int value1;
-	private int value2;
+	private int value1; // for load and store instructions
+	private float value2; // for store instructions only
 	
 	public LoadStoreBuffer(int i, String name) {
 		super(i, name);
 	}
 	
 	public void calculateAddress(int imm, int registerValue){
-		address = value1 + value2;
+		address = imm + registerValue;
 	}
 	
 	public int getAddress() {
@@ -22,17 +22,19 @@ public class LoadStoreBuffer extends ReservationStation{
 	
 	public void setValue1(int value1) {
 		this.value1 = value1;
+		this.secondTag = "";
 	}
 
-	public void setValue2(int value2) {
+	public void setValue2(float value2) {
 		this.value2 = value2;
+		this.secondTag = "";
 	}
 	
 	public int getValue1() {
 		return value1;
 	}
 
-	public int getValue2() {
+	public float getValue2() {
 		return value2;
 	}
 

@@ -57,6 +57,12 @@ public class ReservationStation implements Comparable<ReservationStation>{
 	public void setSecondTag(String secondTag) {
 		this.secondTag = secondTag;
 	}
+	
+	public void free() {
+		this.busy = Global.IDLE;
+		this.firstTag = "";
+		this.secondTag = "";
+	}
 
 	@Override
 	public int compareTo(ReservationStation o) {

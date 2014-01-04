@@ -5,7 +5,7 @@ public class IntRegister extends Register {
 
 	public IntRegister(int value) {
 		super();
-		this.value = value;
+		this.value = 0;
 		this.name = "R" + value;
 	}
 
@@ -16,6 +16,7 @@ public class IntRegister extends Register {
 	public void setValue(int value) {
 		this.value = value;
 		this.status = Status.VALUE;
+		this.tag = "";
 	}
 
 }

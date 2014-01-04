@@ -17,6 +17,7 @@ public class FloatRegister extends Register {
 	public void setValue(float value) {
 		this.value = value;
 		this.status = Status.VALUE;
+		this.tag = "";
 	}
 
 }
