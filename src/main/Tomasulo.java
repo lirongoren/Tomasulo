@@ -553,9 +553,7 @@ public class Tomasulo {
 			}
 			if (instruction.getExecuteEndCycle() == clock) {
 				executeInstruction(instruction);
-				// if (instruction.getOPCODE() != Opcode.ST) {
 				tmpWriteToCDBList.add(instruction);
-				// }
 				executeList.remove(instruction);
 				count--;
 			}
