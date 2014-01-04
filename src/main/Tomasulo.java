@@ -156,6 +156,7 @@ public class Tomasulo {
 
 	/**
 	 * This method triggers the Tomasulo algorithm for one clock cycle.
+	 * 
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
@@ -195,9 +196,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * Every step of Tomasulo algorithm we call this method in order to check if some
-	 * instructions can be moved from the waiting list to the executing list as the operands are ready
-	 * in the appropriate reservation station.
+	 * Every step of Tomasulo algorithm we call this method in order to check if
+	 * some instructions can be moved from the waiting list to the executing
+	 * list as the operands are ready in the appropriate reservation station.
 	 */
 	private void handleWaitingList() {
 		ArrayList<Instruction> tmpRemovedWaitingList = new ArrayList<Instruction>();
@@ -215,22 +216,22 @@ public class Tomasulo {
 	/**
 	 * Fetching an instruction from the memory to the Instruction Queue takes
 	 * one clock cycle.
+	 * 
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
 	private void fetchInstruction() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
-		if (fetchingStatus == Global.UNFINISHED){
-			if (pc < 0 || pc > memory.getMaxWords()-1) {
-				//We may get here as a result of invalid JUMP instruction.
+		if (fetchingStatus == Global.UNFINISHED) {
+			if (pc < 0 || pc > memory.getMaxWords() - 1) {
+				// We may get here as a result of invalid JUMP instruction.
 				throw new ProgramCounterOutOfBoundException();
 			}
-			if (pc == memory.getMaxWords()-1) {
-				//We may get here if no HALT instruction was found.
+			if (pc == memory.getMaxWords() - 1) {
+				// We may get here if no HALT instruction was found.
 				System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 				fetchingStatus = Global.FINISHED;
-			} 
-			else {
-				//Legal situation - fetching an instruction from the memory:
+			} else {
+				// Legal situation - fetching an instruction from the memory:
 				Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
 				if (inst.getOPCODE().equals(Opcode.HALT)) {
 					fetchingStatus = Global.FINISHED;
@@ -250,22 +251,23 @@ public class Tomasulo {
 	}
 
 	/**
-	 * The issue method responsible for the decoding stage of the top instruction in the 
-	 * instruction queue each clock cycle, as long we have instruction to fetch from the memory.
+	 * The issue method responsible for the decoding stage of the top
+	 * instruction in the instruction queue each clock cycle, as long we have
+	 * instruction to fetch from the memory.
 	 * 
-	 * We will consider the following scenarios:
-	 * 1. If there isn't a free appropriate reservation station,
-	 * 	  the instruction will stay in the instructions_queue. We will peek it again in the next issue cycle, 
-	 * 	  after fetching one more instruction from the memory to the instructions queue.
-	 *	  This is what we call structural hazard..
-	 *
-	 * 2. If there is a free reservation station but some of the operands are tags,
-	 * 	  then the instruction will be added to the waiting_list & popped out of
-	 *    the instructions_queue.
-	 *    
-	 * 3. if there is a free reservation station and the operands are ready values from the registers,
-	 * 	  then the instruction will be added to the execute list & popped out of the
-	 * 	  instructions_queue waiting_list.
+	 * We will consider the following scenarios: 1. If there isn't a free
+	 * appropriate reservation station, the instruction will stay in the
+	 * instructions_queue. We will peek it again in the next issue cycle, after
+	 * fetching one more instruction from the memory to the instructions queue.
+	 * This is what we call structural hazard..
+	 * 
+	 * 2. If there is a free reservation station but some of the operands are
+	 * tags, then the instruction will be added to the waiting_list & popped out
+	 * of the instructions_queue.
+	 * 
+	 * 3. if there is a free reservation station and the operands are ready
+	 * values from the registers, then the instruction will be added to the
+	 * execute list & popped out of the instructions_queue waiting_list.
 	 */
 	public void issue(ArrayList<Instruction> tmpExecuteList) {
 		Instruction instruction = instructionsQueue.peek();
@@ -288,7 +290,8 @@ public class Tomasulo {
 			if (buffers.isThereFreeStoreBuffer()) {
 				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
 				setBufferValues(storeBuffer, instruction, tmpExecuteList);
-				// No need to set tag of the destination register, as the destination is the memory.
+				// No need to set tag of the destination register, as the
+				// destination is the memory.
 			} else {
 				// No empty buffer yet. Will try again next cycle.
 			}
@@ -333,34 +336,35 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method checks if the operands of the jump instruction are ready.
-	 * If not - return and the jump instruction will stay at the top of the instructions queue.
-	 * If yes - calculate the branch operation result and change the pc accordingly.
+	 * This method checks if the operands of the jump instruction are ready. If
+	 * not - return and the jump instruction will stay at the top of the
+	 * instructions queue. If yes - calculate the branch operation result and
+	 * change the pc accordingly.
+	 * 
 	 * @param instruction
 	 */
 	private void branchResolution(Instruction instruction) {
-		 int firstValue;
-		 int secondValue;
-		 
+		int firstValue;
+		int secondValue;
+
 		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
-			 firstValue = registers.getIntRegisterValue(instruction.getSRC0());
+			firstValue = registers.getIntRegisterValue(instruction.getSRC0());
 		} else {
-			//There is a data dependency.
+			// There is a data dependency.
 			return;
 		}
-		
+
 		if (registers.getIntRegisterStatus(instruction.getSRC1()) == Status.VALUE) {
-			 secondValue = registers.getIntRegisterValue(instruction.getSRC1());
+			secondValue = registers.getIntRegisterValue(instruction.getSRC1());
 		} else {
-			//There is a data dependency.
+			// There is a data dependency.
 			return;
 		}
-		
-		if (instruction.getOPCODE().equals(Opcode.BNE) && firstValue!=secondValue){
+
+		if (instruction.getOPCODE().equals(Opcode.BNE) && firstValue != secondValue) {
 			pc = instruction.getPc() + instruction.getIMM();
 			emptyInstructionsQueue();
-		}
-		else if (instruction.getOPCODE().equals(Opcode.BEQ) && firstValue==secondValue) {
+		} else if (instruction.getOPCODE().equals(Opcode.BEQ) && firstValue == secondValue) {
 			pc = instruction.getPc() + instruction.getIMM();
 			emptyInstructionsQueue();
 		}
@@ -368,6 +372,7 @@ public class Tomasulo {
 
 	/**
 	 * This method fulfill the reservation station with the required values.
+	 * 
 	 * @param reservationStation
 	 * @param instruction
 	 * @param tmpExecuteList
@@ -410,6 +415,7 @@ public class Tomasulo {
 
 	/**
 	 * This method fulfill the reservation station with the required values.
+	 * 
 	 * @param reservationStation
 	 * @param instruction
 	 * @param tmpExecuteList
@@ -443,7 +449,8 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method fulfill the buffer with the required values. 
+	 * This method fulfill the buffer with the required values.
+	 * 
 	 * @param buffer
 	 * @param instruction
 	 * @param tmpExecuteList
@@ -491,25 +498,48 @@ public class Tomasulo {
 			Instruction instruction = executeList.get(count);
 			if (instruction.getExecuteStartCycle() < 0) {
 				/* the instruction execution hasn't started */
-				instruction.setExecuteStartCycle(clock);
-				instruction.setExecuteEndCycle(clock, getDelay(instruction) - 1);
+				int nextAvailableCycle = getNextAvailableCycle(instruction);
+				instruction.setExecuteStartCycle(clock + nextAvailableCycle);
+				instruction.setExecuteEndCycle(clock + nextAvailableCycle, getDelay(instruction) - 1);
 			} else if (instruction.getExecuteEndCycle() == clock) {
-
-				boolean executed = executeInstruction(instruction);
-
-				/* the instruction execution has ended */
-				// if (instruction.getOPCODE() != Opcode.ST) { // no need to
-				// write to CDB in store instructions
-				// }
-
-				if (executed == true) {
-					tmpWriteToCDBList.add(instruction);
-					executeList.remove(instruction);
-					count--;
-				}
+				executeInstruction(instruction);
+				tmpWriteToCDBList.add(instruction);
+				executeList.remove(instruction);
+				count--;
 			}
 			count++;
 		}
+	}
+
+	private int getNextAvailableCycle(Instruction instruction) {
+		int numOfCycles = 0;
+		switch (instruction.getOPCODE()) {
+		case ADD:
+		case ADDI:
+		case SUB:
+		case SUBI:
+			numOfCycles = this.alu_unit.getNumOfInstructionsWaiting() * this.alu_unit.getDelay();
+			this.alu_unit.increaseNumOfInstructionsWaiting();
+			break;
+		case ADD_S:
+		case SUB_S:
+			numOfCycles = this.FP_add_sub_unit.getNumOfInstructionsWaiting() * this.alu_unit.getDelay();
+			this.FP_add_sub_unit.increaseNumOfInstructionsWaiting();
+			break;
+		case MULT_S:
+			numOfCycles = this.FP_mult_unit.getNumOfInstructionsWaiting() * this.alu_unit.getDelay();
+			this.FP_mult_unit.increaseNumOfInstructionsWaiting();
+			break;
+		case LD:
+		case ST:
+		case JUMP:
+		case BEQ:
+		case BNE:
+		case HALT:
+		default:
+			break;
+		}
+		return numOfCycles;
 	}
 
 	private boolean executeInstruction(Instruction instruction) {
@@ -527,37 +557,44 @@ public class Tomasulo {
 		case ADD:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
+			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ADDI:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = instruction.getIMM();
-			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
+			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case SUB:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = -((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
+			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case SUBI:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			int_input2 = -instruction.getIMM();
-			instruction.setResult((int) integerALU.execute(int_input1, int_input2));
+			instruction.setResult((int) this.alu_unit.execute(int_input1, int_input2));
+			this.alu_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ADD_S:
 			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-			instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
+			instruction.setResult((float) this.FP_add_sub_unit.execute(float_input1, float_input2));
+			this.FP_add_sub_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case SUB_S:
 			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			float_input2 = -((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-			instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
+			instruction.setResult((float) this.FP_add_sub_unit.execute(float_input1, float_input2));
+			this.FP_add_sub_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case MULT_S:
 			float_input1 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
 			float_input2 = ((MulOrAddReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue2();
-			instruction.setResult((float) FPAddSub.execute(float_input1, float_input2));
+			instruction.setResult((float) this.FP_mult_unit.execute(float_input1, float_input2));
+			this.FP_mult_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case JUMP:
 		case BEQ:
@@ -656,7 +693,7 @@ public class Tomasulo {
 			System.out.println("Float Register " + i + ": " + registers.getFloatRegisterValue(i));
 		}
 	}
-	
+
 	/**
 	 * This is a test method.
 	 */
@@ -703,7 +740,7 @@ public class Tomasulo {
 				System.out.println(RS.getNameOfStation());
 			}
 		}
-		
+
 	}
 
 	// Getters & Setters:
