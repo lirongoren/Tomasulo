@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import reservationStations.ReservationStation;
-
 public class Buffers {
 	
 	private Map<String, LoadStoreBuffer> buffers;

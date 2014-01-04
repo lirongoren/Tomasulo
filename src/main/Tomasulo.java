@@ -365,7 +365,7 @@ public class Tomasulo {
 			// There is a data dependency.
 			return;
 		}
-
+		instruction.setExecuteStartCycle(clock);
 		if (instruction.getOPCODE().equals(Opcode.BNE) && firstValue != secondValue) {
 			pc = instruction.getPc() + instruction.getIMM();
 			emptyInstructionsQueue();
@@ -454,7 +454,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method fulfill the buffer with the required values.
+	 * This method fulfill the load buffer with the required values.
 	 * 
 	 * @param buffer
 	 * @param instruction
@@ -485,6 +485,13 @@ public class Tomasulo {
 
 	}
 
+	/**
+	 * This method fulfill the store buffer with the required values.
+	 * 
+	 * @param buffer
+	 * @param instruction
+	 * @param tmpExecuteList
+	 */
 	private void setStoreBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
 		buffer.setOpcode(instruction.getOPCODE());
@@ -523,17 +530,13 @@ public class Tomasulo {
 
 	}
 
-	/*
-	 * iterate over the execList: 1. if the instruction.exec_start == -1: update
-	 * exec_start with clock, exec_end with clock + delay, run
-	 * instruction.execute() and update result (find the delay from the unit it
-	 * should go into according to the opcode) 2. else if exec_end == clock and
-	 * if it is, update result and pop from waiting_list and add to
-	 * write2CDBList
-	 * 
-	 * instruction.execute() checks the opcode and according to the opcode, it
-	 * runs the relevant unit.execute() and its result will enter the
-	 * instruction.result
+	/**
+	 * This method iterate over the execList:
+	 * 1. if the instruction.exec_start == -1: update exec_start & exec_end 
+	 *    after calculating the NextAvailableCycle of the appropriate unit.
+	 *  
+	 * 2. else if exec_end == clock, we will call executeInstruction method, remove the instruction
+	 * 	  from the executing list and add it to the writeToCDBList.
 	 */
 	public void execute(ArrayList<Instruction> tmpWriteToCDBList) {
 		int count = 0;
