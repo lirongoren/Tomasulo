@@ -207,8 +207,7 @@ public class Tomasulo {
 				if (instruction.getOPCODE() == Opcode.LD) {
 					LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
 					load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
-				}
-				else if (instruction.getOPCODE() == Opcode.ST) {
+				} else if (instruction.getOPCODE() == Opcode.ST) {
 					StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
 					store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
 				}
@@ -548,16 +547,22 @@ public class Tomasulo {
 				int nextAvailableCycle = getNextAvailableCycle(instruction);
 				instruction.setExecuteStartCycle(clock + nextAvailableCycle);
 				instruction.setExecuteEndCycle(clock + nextAvailableCycle, getDelay(instruction) - 1);
+				if (instruction.getExecuteEndCycle() == clock) {
+					updateUnit(instruction);
+				}
 			}
 			if (instruction.getExecuteEndCycle() == clock) {
 				executeInstruction(instruction);
+				// if (instruction.getOPCODE() != Opcode.ST) {
 				tmpWriteToCDBList.add(instruction);
+				// }
 				executeList.remove(instruction);
 				count--;
 			}
-			else if (instruction.getExecuteStartCycle() + 1 == clock) {
+			if (instruction.getExecuteStartCycle() + 1 == clock) {
 				updateUnit(instruction);
 			}
+
 			count++;
 		}
 	}
@@ -655,7 +660,7 @@ public class Tomasulo {
 		// Important - store has no writeToCDB. it ends after the execute.
 
 	}
-	
+
 	private void updateUnit(Instruction instruction) {
 		switch (instruction.getOPCODE()) {
 		case LD:
@@ -719,10 +724,12 @@ public class Tomasulo {
 	 */
 	public void writeToCDB() {
 		for (Instruction instruction : writeToCDBList) {
-			instruction.setWriteToCDBCycle(clock);
-			reservationStations.updateTags(instruction.getStation(), instruction.getResult());
-			buffers.updateTags(instruction.getStation(), instruction.getResult());
-			registers.updateTags(instruction.getStation(), instruction.getResult());
+			if (instruction.getOPCODE() != Opcode.ST) {
+				instruction.setWriteToCDBCycle(clock);
+				reservationStations.updateTags(instruction.getStation(), instruction.getResult());
+				buffers.updateTags(instruction.getStation(), instruction.getResult());
+				registers.updateTags(instruction.getStation(), instruction.getResult());
+			}
 			instruction.freeStation(reservationStations, buffers);
 		}
 
