@@ -482,7 +482,7 @@ public class Tomasulo {
 			}
 
 		} else {
-			buffer.setFirstTag(registers.getIntRegisterTag(instruction.getSRC1()));
+			buffer.setFirstTag(registers.getIntRegisterTag(instruction.getSRC0()));
 			waitingList.add(instructionsQueue.poll());
 		}
 
