@@ -580,6 +580,8 @@ public class Tomasulo {
 			break;
 		case LD:
 		case ST:
+			numOfCycles = this.load_store_unit.getNumOfInstructionsWaiting();
+			this.load_store_unit.increaseNumOfInstructionsWaiting();
 		case JUMP:
 		case BEQ:
 		case BNE:
@@ -597,10 +599,12 @@ public class Tomasulo {
 		case LD:
 			LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
 			instruction.setResult(memory.load(load_buffer.getAddress()));
+			this.load_store_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ST:
 			StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
 			memory.store(store_buffer.getAddress(), (int) registers.getFloatRegisterValue(instruction.getSRC1()));
+			this.load_store_unit.decreaseNumOfInstructionsWaiting();
 			break;
 		case ADD:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
