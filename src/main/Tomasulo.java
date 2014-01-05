@@ -38,6 +38,7 @@ public class Tomasulo {
 
 	private boolean fetchingStatus;
 	private boolean globalStatus;
+	private boolean structualHazard;
 	private int clock;
 	private int pc;
 
@@ -66,7 +67,8 @@ public class Tomasulo {
 		clock = 0;
 		fetchingStatus = Global.UNFINISHED;
 		globalStatus = Global.UNFINISHED;
-
+		structualHazard = false;
+		
 		registers = new Registers();
 
 		initializeReservationStations(configuration);
@@ -192,7 +194,7 @@ public class Tomasulo {
 			globalStatus = Global.FINISHED;
 		}
 
-		printReservationStations();
+//		printReservationStations();
 	}
 
 	/**
@@ -228,14 +230,14 @@ public class Tomasulo {
 	 * @throws ProgramCounterOutOfBoundException
 	 */
 	private void fetchInstruction() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
-		if (fetchingStatus == Global.UNFINISHED) {
+		if (fetchingStatus == Global.UNFINISHED && structualHazard==false) {
 			if (pc < 0 || pc > memory.getMaxWords() - 1) {
 				// We may get here as a result of invalid JUMP instruction.
 				throw new ProgramCounterOutOfBoundException();
 			}
 			if (pc == memory.getMaxWords() - 1) {
 				// We may get here if no HALT instruction was found.
-				System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
+				//System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 				fetchingStatus = Global.FINISHED;
 			} else {
 				// Legal situation - fetching an instruction from the memory:
@@ -286,8 +288,10 @@ public class Tomasulo {
 				LoadBuffer loadBuffer = buffers.getFreeLoadBuffer();
 				setLoadBufferValues(loadBuffer, instruction, tmpExecuteList);
 				registers.setFloatRegisterTag(instruction.getDST(), loadBuffer.getNameOfStation());
+				structualHazard = false;
 			} else {
 				// No empty buffer yet. Will try again next cycle.
+				structualHazard = true;
 			}
 		}
 
@@ -295,10 +299,12 @@ public class Tomasulo {
 			if (buffers.isThereFreeStoreBuffer()) {
 				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
 				setStoreBufferValues(storeBuffer, instruction, tmpExecuteList);
+				structualHazard = false;
 				// No need to set tag of the destination register, as the
 				// destination is the memory.
 			} else {
 				// No empty buffer yet. Will try again next cycle.
+				structualHazard = true;
 			}
 		}
 
@@ -306,8 +312,10 @@ public class Tomasulo {
 			if (reservationStations.isThereFreeAddSubRS()) {
 				MulOrAddReservationStation reservationStation = reservationStations.getFreeAddReservationStation();
 				setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);
+				structualHazard = false;
 			} else {
 				// No empty buffer yet. Will try again next cycle.
+				structualHazard = true;
 			}
 		}
 
@@ -315,8 +323,10 @@ public class Tomasulo {
 			if (reservationStations.isThereFreeMulRS()) {
 				MulOrAddReservationStation reservationStation = reservationStations.getFreeMulReservationStation();
 				setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);
+				structualHazard = false;
 			} else {
 				// No empty RS yet. Will try again next cycle.
+				structualHazard = true;
 			}
 		}
 
@@ -325,8 +335,10 @@ public class Tomasulo {
 			if (reservationStations.isThereFreeAluRS()) {
 				AluReservationStation reservationStation = reservationStations.getFreeAluReservationStation();
 				setAluReservationStationValues(reservationStation, instruction, tmpExecuteList);
+				structualHazard = false;
 			} else {
 				// No empty RS yet. Will try again next cycle.
+				structualHazard = true;
 			}
 		}
 
@@ -357,6 +369,7 @@ public class Tomasulo {
 			firstValue = registers.getIntRegisterValue(instruction.getSRC0());
 		} else {
 			// There is a data dependency.
+			structualHazard=true;
 			return;
 		}
 
@@ -364,6 +377,7 @@ public class Tomasulo {
 			secondValue = registers.getIntRegisterValue(instruction.getSRC1());
 		} else {
 			// There is a data dependency.
+			structualHazard=true;
 			return;
 		}
 		instruction.setExecuteStartCycle(clock);
@@ -374,6 +388,10 @@ public class Tomasulo {
 			pc = instruction.getPc() + instruction.getIMM();
 			emptyInstructionsQueue();
 		}
+		else{
+			instructionsQueue.poll();
+		}
+		structualHazard=false;
 	}
 
 	/**

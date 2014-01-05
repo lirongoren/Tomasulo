@@ -15,7 +15,7 @@ public class Main {
 		
 		while (!tomasulo.isFinished()) {
 			tomasulo.step();
-			tomasulo.printRegistersValues();
+//			tomasulo.printRegistersValues();
 		}
 		
 		parser.createMemoryOutputFile();
@@ -24,7 +24,7 @@ public class Main {
 		parser.createTraceOutputFile(tomasulo.getInstructionsStaticQueue());
 		
 //		tomasulo.printInstructions();
-		tomasulo.printRegistersValues();	
+//		tomasulo.printRegistersValues();	
 	}
 	
 	
