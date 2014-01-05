@@ -614,7 +614,7 @@ public class Tomasulo {
 			break;
 		case ST:
 			StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
-			memory.store(store_buffer.getAddress(), registers.getFloatRegisterValue(instruction.getSRC1()));
+			memory.store(store_buffer.getAddress(), store_buffer.getValue2());
 			break;
 		case ADD:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
