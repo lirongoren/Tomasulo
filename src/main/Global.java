@@ -16,42 +16,9 @@ public class Global {
     public static final int MULT_S = 11; //F[DST] = F[SRC0] * F[SRC1]
     public static final int HALT = 12; //exit simulator
     
-    public static final int FloatingPointRegistersNum = 8;
-    public static final int F0 = 0;
-    public static final int F1 = 1;
-    public static final int F2 = 2;
-    public static final int F3 = 3;
-    public static final int F4 = 4;
-    public static final int F5 = 5;
-    public static final int F6 = 6;
-    public static final int F7 = 7; 
-    public static final int F8 = 8; 
-    public static final int F9 = 9; 
-    public static final int F10 = 10; 
-    public static final int F11 = 11; 
-    public static final int F12 = 12; 
-    public static final int F13 = 13; 
-    public static final int F14 = 14; 
-    public static final int F15 = 15; 
-
-    public static final int IntegerRegistersNum = 8;
-    public static final int R0 = 0;
-    public static final int R1 = 1;
-    public static final int R2 = 2;
-    public static final int R3 = 3;
-    public static final int R4 = 4;
-    public static final int R5 = 5;
-    public static final int R6 = 6;
-    public static final int R7 = 7; 
-    public static final int R8 = 8; 
-    public static final int R9 = 9; 
-    public static final int R10 = 10; 
-    public static final int R11 = 11; 
-    public static final int R12 = 12; 
-    public static final int R13 = 13; 
-    public static final int R14 = 14; 
-    public static final int R15 = 15; 
-        
+    public static final int FloatingPointRegistersNum = 16;
+    public static final int IntegerRegistersNum = 16;
+         
     public static final boolean UNFINISHED = false;
     public static final boolean FINISHED = true; 
     

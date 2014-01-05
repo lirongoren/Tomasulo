@@ -32,8 +32,8 @@ public class Memory {
      * @param pointer
      * @param data
      */
-    public void store(int pointer, int data){  	 
-        mem[pointer] = data;
+    public void store(int pointer, float data){  	 
+        mem[pointer] = Float.floatToIntBits(data);
     } 
     
     /**

@@ -3,6 +3,7 @@ package registers;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
+import main.Global;
 import registers.Register.Status;
 
 public class Registers {
@@ -10,11 +11,11 @@ public class Registers {
 	private FloatRegister[] float_registers;
 	
 	public Registers() {
-		int_registers = new IntRegister[16];
+		int_registers = new IntRegister[Global.IntegerRegistersNum];
 		for (int i = 0; i < 16; i++) {
 			int_registers[i] = new IntRegister(i);
 		}
-		float_registers = new FloatRegister[16];
+		float_registers = new FloatRegister[Global.FloatingPointRegistersNum];
 		for (int i = 0; i < 16; i++) {
 			float_registers[i] = new FloatRegister((float) i);
 		}

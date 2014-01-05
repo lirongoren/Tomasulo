@@ -288,55 +288,35 @@ public class Tomasulo {
 
 		instruction.setIssueCycle(clock);
 
-		if (instruction.getOPCODE().equals(Opcode.LD)) {
-			if (buffers.isThereFreeLoadBuffer()) {
-				LoadBuffer loadBuffer = buffers.getFreeLoadBuffer();
-				setLoadBufferValues(loadBuffer, instruction, tmpExecuteList);
-				registers.setFloatRegisterTag(instruction.getDST(), loadBuffer.getNameOfStation());
-				
-			} else {
-				// No empty buffer yet. Will try again next cycle.
-			}
+		if (instruction.getOPCODE().equals(Opcode.LD) && buffers.isThereFreeLoadBuffer()) {	
+			LoadBuffer loadBuffer = buffers.getFreeLoadBuffer();
+			setLoadBufferValues(loadBuffer, instruction, tmpExecuteList);
+			registers.setFloatRegisterTag(instruction.getDST(), loadBuffer.getNameOfStation());	
 		}
 
-		else if (instruction.getOPCODE().equals(Opcode.ST)) {
-			if (buffers.isThereFreeStoreBuffer()) {
-				StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
-				setStoreBufferValues(storeBuffer, instruction, tmpExecuteList);
-				// No need to set tag of the destination register, as the
-				// destination is the memory.
-			} else {
-				// No empty buffer yet. Will try again next cycle.
-			}
+		else if (instruction.getOPCODE().equals(Opcode.ST) && buffers.isThereFreeStoreBuffer()) {	
+			StoreBuffer storeBuffer = buffers.getFreeStoreBuffer();
+			setStoreBufferValues(storeBuffer, instruction, tmpExecuteList);
+			// No need to set tag of the destination register, as the destination is the memory.
 		}
 
-		else if (instruction.getOPCODE().equals(Opcode.ADD_S) || instruction.getOPCODE().equals(Opcode.SUB_S)) {
-			if (reservationStations.isThereFreeAddSubRS()) {
-				MulOrAddReservationStation reservationStation = reservationStations.getFreeAddReservationStation();
-				setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);
-			} else {
-				// No empty buffer yet. Will try again next cycle.
-			}
+		else if ((instruction.getOPCODE().equals(Opcode.ADD_S) || instruction.getOPCODE().equals(Opcode.SUB_S))
+				&& reservationStations.isThereFreeAddSubRS()) {
+			
+			MulOrAddReservationStation reservationStation = reservationStations.getFreeAddReservationStation();
+			setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);	 
 		}
 
-		else if (instruction.getOPCODE().equals(Opcode.MULT_S)) {
-			if (reservationStations.isThereFreeMulRS()) {
-				MulOrAddReservationStation reservationStation = reservationStations.getFreeMulReservationStation();
-				setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);
-			} 
-			else {
-				// No empty RS yet. Will try again next cycle.
-			}
+		else if (instruction.getOPCODE().equals(Opcode.MULT_S) && reservationStations.isThereFreeMulRS()) {
+			MulOrAddReservationStation reservationStation = reservationStations.getFreeMulReservationStation();
+			setFloatReservationStationValues(reservationStation, instruction, tmpExecuteList);
 		}
 
-		else if (instruction.getOPCODE().equals(Opcode.ADD) || instruction.getOPCODE().equals(Opcode.SUB) || instruction.getOPCODE().equals(Opcode.ADDI)
-				|| instruction.getOPCODE().equals(Opcode.SUBI)) {
-			if (reservationStations.isThereFreeAluRS()) {
-				AluReservationStation reservationStation = reservationStations.getFreeAluReservationStation();
-				setAluReservationStationValues(reservationStation, instruction, tmpExecuteList);
-			} else {
-				// No empty RS yet. Will try again next cycle.
-			}
+		else if ((instruction.getOPCODE().equals(Opcode.ADD) || instruction.getOPCODE().equals(Opcode.SUB) || instruction.getOPCODE().equals(Opcode.ADDI)
+				|| instruction.getOPCODE().equals(Opcode.SUBI)) && reservationStations.isThereFreeAluRS()) {
+			
+			AluReservationStation reservationStation = reservationStations.getFreeAluReservationStation();
+			setAluReservationStationValues(reservationStation, instruction, tmpExecuteList);	
 		}
 
 		else if (instruction.getOPCODE().equals(Opcode.JUMP)) {
@@ -478,7 +458,6 @@ public class Tomasulo {
 	private void setLoadBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
 		buffer.setOpcode(instruction.getOPCODE());
-		// buffer.setValue1(instruction.getIMM());
 		instruction.setStation(buffer.getNameOfStation());
 
 		if (registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE) {
@@ -546,9 +525,10 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method iterate over the execList: 1. if the instruction.exec_start
-	 * == -1: update exec_start & exec_end after calculating the
-	 * NextAvailableCycle of the appropriate unit.
+	 * This method iterate over the execList:
+	 * 
+	 * 1. if the instruction.exec_start == -1:
+	 * update exec_start & exec_end after calculating the NextAvailableCycle of the appropriate unit.
 	 * 
 	 * 2. else if exec_end == clock, we will call executeInstruction method,
 	 * remove the instruction from the executing list and add it to the
@@ -582,6 +562,11 @@ public class Tomasulo {
 		}
 	}
 
+	/**
+	 * 
+	 * @param instruction
+	 * @return
+	 */
 	private int getNextAvailableCycle(Instruction instruction) {
 		int numOfCycles = 0;
 		switch (instruction.getOPCODE()) {
@@ -615,6 +600,10 @@ public class Tomasulo {
 		return numOfCycles;
 	}
 
+	/**
+	 * 
+	 * @param instruction
+	 */
 	private void executeInstruction(Instruction instruction) {
 		float float_input1, float_input2;
 		int int_input1, int_input2;
@@ -625,7 +614,7 @@ public class Tomasulo {
 			break;
 		case ST:
 			StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
-			memory.store(store_buffer.getAddress(), (int) registers.getFloatRegisterValue(instruction.getSRC1()));
+			memory.store(store_buffer.getAddress(), registers.getFloatRegisterValue(instruction.getSRC1()));
 			break;
 		case ADD:
 			int_input1 = ((AluReservationStation) reservationStations.getReservationStation(instruction.getStation())).getValue1();
@@ -671,11 +660,12 @@ public class Tomasulo {
 		}
 
 		// TODO - other instructions types
-
-		// Important - store has no writeToCDB. it ends after the execute.
-
 	}
 
+	/**
+	 * 
+	 * @param instruction
+	 */
 	private void updateUnit(Instruction instruction) {
 		switch (instruction.getOPCODE()) {
 		case LD:
@@ -730,12 +720,14 @@ public class Tomasulo {
 		return alu_unit.getDelay();
 	}
 
-	/*
+	/**
 	 * 1. iterate over the write2CDBList, for each iteration iterate over the
 	 * registers, RS's and buffers and update the tags with the value of the
-	 * instruction 2. iterate over the waiting_list and for each instruction
+	 * instruction.
+	 * 
+	 * 2. iterate over the waiting_list and for each instruction
 	 * whose RS / buffer is ready, add the instruction to the execList and pop
-	 * it from the waitingList
+	 * it out of the waitingList.
 	 */
 	public void writeToCDB() {
 		for (Instruction instruction : writeToCDBList) {
@@ -791,6 +783,7 @@ public class Tomasulo {
 	/**
 	 * This is a test method.
 	 */
+	@SuppressWarnings("unused")
 	private void printReservationStations() {
 		System.out.println("Reservation Stations: cycle" + this.clock);
 		System.out.println("Name\tOp\tVj\tVk\tQj\tQk\tA\tInstr #");
