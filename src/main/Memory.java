@@ -4,47 +4,53 @@ public class Memory {
 	 
     private int[] mem;
     private int maxWords = 1024;
-   
 	private int insertPtr = 0;
     
+	/**
+	 * Creates an array of 1024 integers.
+	 */
     public Memory(){	
     	mem =  new int[maxWords];
     }
     
     /**
-     * 
-     * @return
+     * @return the max words in the memory.
      */
     public int getMaxWords() {
 		return maxWords;
 	}
     
     /**
-     * 
-     * @param data
+     * Inserts data into the memory.
+     * @param data the data that will be inserted into the memory.
      */
     public void insert(int data){
     	mem[insertPtr++] = data; 
     }
         
     /**
-     * 
-     * @param pointer
-     * @param data
+     * Stores the data into the pointer given in the memory.
+     * @param pointer the location in which the data is stored.
+     * @param data the data that will be stored.
      */
     public void store(int pointer, float data){  	 
         mem[pointer] = Float.floatToIntBits(data);
     } 
     
     /**
-     * 
-     * @param pointer
-     * @return
+     * Loads the data from the given pointer in the memory.
+     * @param pointer the location from which the data will be load.
+     * @return the data from the memory.
      */
     public int load(int pointer){
     	return mem[pointer]; 
     }
     
+    /**
+     * Converts data from a given pointer into a hex string and loads it.
+     * @param pointer the pointer that we will load from.
+     * @return the data from the memory as a hex.
+     */
     public String loadAsHexString(int pointer){
     	String result = Integer.toHexString(mem[pointer]);
 		while (result.length() < 8) {
@@ -54,9 +60,9 @@ public class Memory {
     }
     
     /**
-     * 
-     * @param pointer
-     * @return
+     * Converts data from a given pointer into a binary string and loads it.
+     * @param pointer the pointer that we will load from.
+     * @return the data from the memory as a binary.
      */
 	public String loadAsBinaryString(int pointer) {
 		String result = Integer.toBinaryString(mem[pointer]);

@@ -22,8 +22,11 @@ import exceptions.MissingNumberOfReservationStationsException;
 import exceptions.ProgramCounterOutOfBoundException;
 import exceptions.UnknownOpcodeException;
 
+/**
+ * That class is the main flow of the processor.
+ */
 public class Tomasulo {
-
+	
 	private Queue<Instruction> instructionsQueue;
 	private Queue<Instruction> instructionsStaticQueue;
 
@@ -48,9 +51,9 @@ public class Tomasulo {
 	private LoadStore load_store_unit;
 
 	/**
-	 * 
-	 * @param mem
-	 * @param configuration
+	 * Initializes the program's flow according to the configuration and memory given.
+	 * @param mem the memory of the program.
+	 * @param configuration the configuration of the program.
 	 * @throws MissingNumberOfReservationStationsException
 	 * @throws MissingNumberOfLoadStoreBuffersException
 	 */
@@ -77,10 +80,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method creates the store & buffers. In any case of invalid input
-	 * (non value / value=zero) an exception is thrown.
-	 * 
-	 * @param configuration
+	 * Creates the store & load buffers. In any case of invalid input
+	 * (non value / value = zero) an exception is thrown.
+	 * @param configuration the configuration of the processor.
 	 * @throws MissingLoadStoreBuffers
 	 */
 	private void initializeBuffers(Map<String, Integer> configuration) throws MissingNumberOfLoadStoreBuffersException {
@@ -99,14 +101,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method creates the reservation stations. In any case of invalid
+	 * Creates the reservation stations of the processor. In any case of invalid
 	 * input (non value / value=zero) an exception is thrown.
-	 * 
 	 * @param configuration
 	 * @throws MisssingReservationsException
 	 */
 	private void initializeReservationStations(Map<String, Integer> configuration) throws MissingNumberOfReservationStationsException {
-		// reservationStationsMap = new HashMap<String, ReservastionStation>();
 		int numMulRS;
 		int numAddRS;
 		int numAluRS;
@@ -114,7 +114,6 @@ public class Tomasulo {
 			numMulRS = configuration.get("mul_nr_reservation");
 			numAddRS = configuration.get("add_nr_reservation");
 			numAluRS = configuration.get("int_nr_reservation");
-
 		} catch (NullPointerException e) {
 			throw new MissingNumberOfReservationStationsException();
 		}

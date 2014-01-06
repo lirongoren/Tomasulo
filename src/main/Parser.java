@@ -11,31 +11,33 @@ import java.util.Map;
 import java.util.Queue;
 
 import registers.Registers;
-
+/**
+ * The parser will parse the input files & create the output files.
+ */
 public class Parser {
 
 	private Map<String, Integer> configuration;
 	private Memory memory;
 
 	/**
-	 * This parser will parse the input files & create the output files.
-	 * 
-	 * @param txtFiles
+	 * Creates the configuration and the memory of the processor.
+	 * @param configuration_file
+	 * @param memory_file
 	 */
-	public Parser(String memory_file, String configuration_file) {
+	public Parser(String configuration_file, String memory_file) {
 		this.configuration = new HashMap<String, Integer>();
 		this.memory = new Memory();
 		try {
 			this.parseMemoryFile(memory_file);
 			this.parseConfigurationFile(configuration_file);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
 /***************************************INPUT FILES************************************/
 	/**
-	 * 
+	 * Parses the configuration file and creates a map of configuration.
 	 * @param configuration_file
 	 * @throws IOException
 	 */
@@ -57,7 +59,7 @@ public class Parser {
 	}
 
 	/**
-	 * 
+	 * Parses the memory input file and creates the Memory.
 	 * @param memory_file
 	 * @throws IOException
 	 */
@@ -74,13 +76,14 @@ public class Parser {
 			memory.insert((int) Long.parseLong(str, 16));
 		}
 	}
+	
 /***************************************OUTPUT FILES************************************/
 	/**
-	 * 
+	 * Creates the memory output file.
 	 * @throws IOException
 	 */
 	public void createMemoryOutputFile() throws IOException {
-		File file = new File("memout.txt");
+		File file = new File("memout.txt"); // TODO - create the file according to the arguments
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		for (int i = 0; i < 1024; i++) {
 			String str = memory.loadAsHexString(i);
@@ -91,12 +94,12 @@ public class Parser {
 	}
 
 	/**
-	 * 
+	 * Creates the trace output file.
 	 * @param instructions_queue
 	 * @throws IOException
 	 */
 	public void createTraceOutputFile(Queue<Instruction> instructions_queue) throws IOException {
-		File file = new File("trace.txt");
+		File file = new File("trace.txt"); // TODO - create the file according to the arguments
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		String hexInst;
 		
@@ -122,30 +125,31 @@ public class Parser {
 	}
 
 	/**
-	 * 
+	 * Creates the int registers output file.
 	 * @param registers
 	 * @throws IOException
 	 */
 	public void createIntRegistersOutputFile(Registers registers) throws IOException {
-		File file = new File("regint.txt");
+		File file = new File("regint.txt"); // TODO - create the file according to the arguments
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		registers.printIntRegisters(output);
 		output.close();
 	}
 	
 	/**
-	 * 
+	 * Creates the float registers output file.
 	 * @param registers
 	 * @throws IOException
 	 */
 	public void createFloatRegistersOutputFile(Registers registers) throws IOException {
-		File file = new File("regout.txt");
+		File file = new File("regout.txt"); // TODO - create the file according to the arguments
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		registers.printFloatRegisters(output);
 		output.close();
 	}
 
 /***************************************Getters & Setters *************************************/
+	
 	public Map<String, Integer> getConfiguration() {
 		return configuration;
 	}
