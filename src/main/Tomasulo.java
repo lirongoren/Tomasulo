@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-
 import main.Instruction.Opcode;
 import registers.Register.Status;
 import registers.Registers;
@@ -28,31 +27,31 @@ import exceptions.UnknownOpcodeException;
 public class Tomasulo {
 	
 	private Queue<Instruction> instructionsQueue;			/* All of the instructions that are in the instructions queue */
-	private Queue<Instruction> instructionsStaticQueue;
+	private Queue<Instruction> instructionsStaticQueue;		/* All of the instructions that enter the instructions queue, will be printed in the trace output file */
 
-	private ArrayList<Instruction> waitingList;
-	private ArrayList<Instruction> executeList;
-	private ArrayList<Instruction> writeToCDBList;
+	private ArrayList<Instruction> waitingList;				/* All of the instructions that are issued but not ready to be executed */
+	private ArrayList<Instruction> executeList;				/* All of the instructions that are ready to be executed / are executed now */
+	private ArrayList<Instruction> writeToCDBList;			/* All of the instructions that are ready to write to the CDB */
 
-	private Memory memory;
-	private Registers registers;
-	private ReservationStations reservationStations;
-	private Buffers buffers;
+	private Memory memory;									/* The main memory of the processor */
+	private Registers registers;							/* The processor's int & float registers */
+	private ReservationStations reservationStations;		/* The processor's reservation stations */
+	private Buffers buffers;								/* The processor's buffers */
 
-	private boolean fetchingStatus;
-	private boolean globalStatus;
-	private boolean fetchedHaltInst;
-	private int clock;
-	private int pc;
+	private boolean fetchingStatus;							/* The fetching status: whether or not we should fetch */
+	private boolean globalStatus;							/* The program's status: whether it's finished or not */
+	private boolean fetchedHaltInst;						/* Whether or not a HALT instruction was fetched */
+	private int clock;										/* The current clock cycle */
+	private int pc;											/* The current PC */
 
-	private integerALU alu_unit;
-	private FPAddSub FP_add_sub_unit;
-	private FPMul FP_mult_unit;
-	private LoadStore load_store_unit;
+	private integerALU alu_unit;							/* The processor's ALU unit */
+	private FPAddSub FP_add_sub_unit;						/* The processor's floating point ADD/SUB unit */
+	private FPMul FP_mult_unit;								/* The processor's floating point MUL unit */
+	private LoadStore load_store_unit;						/* The processor's load/store unit */
 
 	/**
 	 * Initializes the program's flow according to the configuration and memory given.
-	 * @param mem the memory of the program.
+	 * @param mem the main memory.
 	 * @param configuration the configuration of the program.
 	 * @throws MissingNumberOfReservationStationsException
 	 * @throws MissingNumberOfLoadStoreBuffersException
@@ -103,7 +102,7 @@ public class Tomasulo {
 	/**
 	 * Creates the reservation stations of the processor. In any case of invalid
 	 * input (non value / value=zero) an exception is thrown.
-	 * @param configuration
+	 * @param configuration the configuration of the processor.
 	 * @throws MisssingReservationsException
 	 */
 	private void initializeReservationStations(Map<String, Integer> configuration) throws MissingNumberOfReservationStationsException {
@@ -124,10 +123,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method creates the execute units. In any case of value=0 on the
-	 * cfg.txt we will create a unit with latency=0.
-	 * 
-	 * @param configuration
+	 * This method creates the processor's units. In any case of invalid
+	 * input (non value / value=zero) it will create a unit with delay = 0.
+	 * @param configuration the configuration of the processor.
 	 */
 	private void initializeUnits(Map<String, Integer> configuration) {
 		try {
@@ -157,7 +155,7 @@ public class Tomasulo {
 
 	/**
 	 * This method triggers the Tomasulo algorithm for one clock cycle.
-	 * 
+	 * Runs the main stages: fetch, issue, execute, write to CDB.
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
@@ -200,9 +198,9 @@ public class Tomasulo {
 	}
 
 	/**
-	 * Every step of Tomasulo algorithm we call this method in order to check if
+	 * In every step of Tomasulo algorithm we call this method in order to check if
 	 * some instructions can be moved from the waiting list to the executing
-	 * list as the operands are ready in the appropriate reservation station.
+	 * list as the operands are ready in the appropriate reservation station / buffer.
 	 */
 	private void handleWaitingList() {
 		ArrayList<Instruction> tmpRemovedWaitingList = new ArrayList<Instruction>();
@@ -225,9 +223,8 @@ public class Tomasulo {
 	}
 
 	/**
-	 * Fetching an instruction from the memory to the Instruction Queue takes
+	 * Fetches an instruction from the memory into the Instruction Queue takes
 	 * one clock cycle.
-	 * 
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
 	 */
@@ -256,7 +253,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * For JUMP instructions.
+	 * For JUMP / BRANCH_TAKEN instructions: empties the instructions queue.
 	 */
 	private void emptyInstructionsQueue() {
 		instructionsQueue.clear();
@@ -281,6 +278,11 @@ public class Tomasulo {
 	 * 3. if there is a free reservation station and the operands are ready
 	 * values from the registers, then the instruction will be added to the
 	 * execute list & popped out of the instructions_queue waiting_list.
+	 * 
+	 * @param tmpExecuteList the temporary execute list: all of the instructions
+	 * that are ready to be executed will be added to that list, and in the end of
+	 * the cycle they will be added to the executeList in order to be executed
+	 * only in the next cycle.
 	 */
 	public void issue(ArrayList<Instruction> tmpExecuteList) {
 		Instruction instruction = instructionsQueue.peek();
@@ -330,12 +332,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method checks if the operands of the jump instruction are ready. If
-	 * not - return and the jump instruction will stay at the top of the
-	 * instructions queue. If yes - calculate the branch operation result and
-	 * change the pc accordingly.
+	 * This method checks if the operands of the branch instruction are ready. If
+	 * not - returns and the jump instruction will stay at the top of the
+	 * instructions queue. If yes - calculates the branch operation result,
+	 * changes the pc accordingly and empties the instructionsQueue.
 	 * 
-	 * @param instruction
+	 * @param instruction the branch instruction
 	 */
 	private void branchResolution(Instruction instruction) {
 		int firstValue;
@@ -370,11 +372,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method fulfill the reservation station with the required values.
+	 * This method fulfills the ALU reservation station with the required values.
 	 * 
-	 * @param reservationStation
-	 * @param instruction
-	 * @param tmpExecuteList
+	 * @param reservationStation the ALU reservation station
+	 * @param instruction the current instruction
+	 * @param tmpExecuteList the temporary execute list: if the instruction is
+	 * ready to be executed it will be added to that list and executed in the next cycle.
 	 */
 	private void setAluReservationStationValues(AluReservationStation reservationStation, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 
@@ -413,11 +416,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method fulfill the reservation station with the required values.
+	 * This method fulfills the FP reservation station with the required values.
 	 * 
-	 * @param reservationStation
-	 * @param instruction
-	 * @param tmpExecuteList
+	 * @param reservationStation the FP reservation station
+	 * @param instruction the current instruction
+	 * @param tmpExecuteList the temporary execute list: if the instruction is
+	 * ready to be executed it will be added to that list and executed in the next cycle.
 	 */
 	private void setFloatReservationStationValues(MulOrAddReservationStation reservationStation, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 
@@ -448,11 +452,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method fulfill the load buffer with the required values.
+	 * This method fulfills the load buffer with the required values.
 	 * 
-	 * @param buffer
-	 * @param instruction
-	 * @param tmpExecuteList
+	 * @param buffer the load buffer
+	 * @param instruction the current instruction
+	 * @param tmpExecuteList the temporary execute list: if the instruction is
+	 * ready to be executed it will be added to that list and executed in the next cycle.
 	 */
 	private void setLoadBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
@@ -479,11 +484,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method fulfill the store buffer with the required values.
+	 * This method fulfills the store buffer with the required values.
 	 * 
-	 * @param buffer
-	 * @param instruction
-	 * @param tmpExecuteList
+	 * @param buffer the store buffer
+	 * @param instruction the current instruction
+	 * @param tmpExecuteList the temporary execute list: if the instruction is
+	 * ready to be executed it will be added to that list and executed in the next cycle.
 	 */
 	private void setStoreBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
@@ -524,7 +530,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This method iterate over the execList:
+	 * This method iterates over the execList:
 	 * 
 	 * 1. if the instruction.exec_start == -1:
 	 * update exec_start & exec_end after calculating the NextAvailableCycle of the appropriate unit.
@@ -532,6 +538,11 @@ public class Tomasulo {
 	 * 2. else if exec_end == clock, we will call executeInstruction method,
 	 * remove the instruction from the executing list and add it to the
 	 * writeToCDBList.
+	 * 
+	 * @param tmpWriteToCDBList the temporary writeToCDB list:
+	 * if the instruction is done its execution stage it will be added to that list, in the end
+	 * of the cycle will be added to the writeToCDBList in order to be written to the CDB in
+	 * the next cycle.
 	 */
 	public void execute(ArrayList<Instruction> tmpWriteToCDBList) {
 		int count = 0;
@@ -562,9 +573,13 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
-	 * @param instruction
-	 * @return
+	 * Returns the next available cycle that the unit will be available for the instruction.
+	 * That function is called from the execute() function, therefore it means that there
+	 * is one more instruction waiting for the relevant unit, therefore it increases the
+	 * number of instructions waiting for that unit.
+	 * @param instruction the current instruction
+	 * @return the number of cycles the instruction will have to wait in order to enter
+	 * the unit.
 	 */
 	private int getNextAvailableCycle(Instruction instruction) {
 		int numOfCycles = 0;
@@ -600,8 +615,8 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 
-	 * @param instruction
+	 * Executes the instruction.
+	 * @param instruction the current instruction that is executed.
 	 */
 	private void executeInstruction(Instruction instruction) {
 		float float_input1, float_input2;
@@ -662,8 +677,12 @@ public class Tomasulo {
 	}
 
 	/**
+	 * Updates the unit with the number of instructions that are waiting to enter the unit:
+	 * if the instruction's start_cycle + 1 == current_cycle then the number of instructions
+	 * waiting for the unit is decreased. This function is called from the execute() function.
 	 * 
-	 * @param instruction
+	 * @param instruction the current instruction that is already in the unit and frees space
+	 * for other instructions to enter it.
 	 */
 	private void updateUnit(Instruction instruction) {
 		switch (instruction.getOPCODE()) {
@@ -691,17 +710,13 @@ public class Tomasulo {
 		default:
 			break;
 		}
-
-		// TODO - other instructions types
-
-		// Important - store has no writeToCDB. it ends after the execute.
-
 	}
 
 	/**
+	 * This method returns the delay of the relevant unit of the instruction.
 	 * 
-	 * @param instruction
-	 * @return
+	 * @param instruction the current instruction
+	 * @return the delay of the relevant unit.
 	 */
 	private int getDelay(Instruction instruction) {
 		Opcode opcode = instruction.getOPCODE();
@@ -720,13 +735,12 @@ public class Tomasulo {
 	}
 
 	/**
-	 * 1. iterate over the write2CDBList, for each iteration iterate over the
+	 * This function:
+	 * 1. Iterates over the write2CDBList, for each instruction it iterates over the
 	 * registers, RS's and buffers and update the tags with the value of the
 	 * instruction.
 	 * 
-	 * 2. iterate over the waiting_list and for each instruction
-	 * whose RS / buffer is ready, add the instruction to the execList and pop
-	 * it out of the waitingList.
+	 * 2. Empties the WriteToCDBList.
 	 */
 	public void writeToCDB() {
 		for (Instruction instruction : writeToCDBList) {
@@ -743,7 +757,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This is a test method.
+	 * Prints the instructions that are in the initial memory - for DEBUG.
 	 * 
 	 * @throws UnknownOpcodeException
 	 * @throws ProgramCounterOutOfBoundException
@@ -765,7 +779,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This is a test method.
+	 * Prints the registers values - for DEBUG.
 	 */
 	public void printRegistersValues() {
 		System.out.println("Integer registers values:\n");
@@ -780,7 +794,7 @@ public class Tomasulo {
 	}
 
 	/**
-	 * This is a test method.
+	 * Prints the reservation stations and buffers state - for DEBUG.
 	 */
 	@SuppressWarnings("unused")
 	private void printReservationStations() {
@@ -829,7 +843,8 @@ public class Tomasulo {
 
 	}
 
-	// Getters & Setters:
+	// Getters & Setters
+	
 	public boolean isFinished() {
 		return globalStatus;
 	}
