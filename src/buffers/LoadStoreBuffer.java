@@ -2,7 +2,7 @@ package buffers;
 
 import reservationStations.ReservationStation;
 
-public class LoadStoreBuffer extends ReservationStation{
+public class LoadStoreBuffer extends ReservationStation {
 	
 	private int address;
 	private int value1; // for load and store instructions

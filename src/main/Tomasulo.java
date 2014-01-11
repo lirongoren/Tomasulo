@@ -27,7 +27,7 @@ import exceptions.UnknownOpcodeException;
  */
 public class Tomasulo {
 	
-	private Queue<Instruction> instructionsQueue;
+	private Queue<Instruction> instructionsQueue;			/* All of the instructions that are in the instructions queue */
 	private Queue<Instruction> instructionsStaticQueue;
 
 	private ArrayList<Instruction> waitingList;
