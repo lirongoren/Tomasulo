@@ -28,7 +28,7 @@ public class Tomasulo {
 	
 	private Queue<Instruction> instructionsQueue;			/* All of the instructions that are in the instructions queue */
 	private Queue<Instruction> instructionsStaticQueue;		/* All of the instructions that enter the instructions queue, will be printed in the trace output file */
-
+	
 	private ArrayList<Instruction> waitingList;				/* All of the instructions that are issued but not ready to be executed */
 	private ArrayList<Instruction> executeList;				/* All of the instructions that are ready to be executed / are executed now */
 	private ArrayList<Instruction> writeToCDBList;			/* All of the instructions that are ready to write to the CDB */
@@ -469,7 +469,8 @@ public class Tomasulo {
 
 			// We decided to calculate the effective address at the issue stage:
 			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
-
+			buffers.addToAddressMap(buffer, instruction);
+			
 			if (!buffers.isThereAddressCollision()) {
 				tmpExecuteList.add(instructionsQueue.poll());
 			} else {
@@ -491,7 +492,7 @@ public class Tomasulo {
 	 * @param tmpExecuteList the temporary execute list: if the instruction is
 	 * ready to be executed it will be added to that list and executed in the next cycle.
 	 */
-	private void setStoreBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
+	private void setStoreBufferValues(StoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
 		buffer.setOpcode(instruction.getOPCODE());
 		instruction.setStation(buffer.getNameOfStation());
@@ -511,7 +512,8 @@ public class Tomasulo {
 
 			// We decided to calculate the effective address at the issue stage:
 			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
-
+			buffers.addToAddressMap(buffer, instruction);
+			
 			if (buffer.getSecondTag().isEmpty()) {
 				if (!buffers.isThereAddressCollision()) {
 					tmpExecuteList.add(instructionsQueue.poll());
@@ -672,8 +674,6 @@ public class Tomasulo {
 		default:
 			break;
 		}
-
-		// TODO - other instructions types
 	}
 
 	/**

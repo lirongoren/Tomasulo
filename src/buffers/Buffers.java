@@ -3,18 +3,24 @@ package buffers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+
+import main.Instruction;
 
 public class Buffers {
 	
 	private Map<String, LoadStoreBuffer> buffers;
 	private List<StoreBuffer> storeBuffers;
 	private List<LoadBuffer> loadBuffers;
+	private Map<Integer, Queue<Instruction>> addressToInstructions;
 
 	public Buffers(int numStoreBuffers, int numLoadBuffers){	
 		int i;
 		buffers = new HashMap<String, LoadStoreBuffer>();
+		addressToInstructions = new HashMap<Integer, Queue<Instruction>>();
 		
 		storeBuffers = new ArrayList<StoreBuffer>();
 		for (i=0 ; i<numStoreBuffers ; i++){
@@ -111,6 +117,11 @@ public class Buffers {
 		if (buffer.isReady()) {
 			buffer.free();
 		}
+	}
+
+	public void addToAddressMap(LoadStoreBuffer buffer, Instruction instruction) {
+		
+		
 	}
 	
 	
