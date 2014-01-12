@@ -12,7 +12,7 @@ public class Instruction {
 	private String binaryInst = "";
 	private String station = "";
 
-	private int pc = -1; // TODO - check if we need that field
+	private int pc = -1; 
 	private int issueCycle = -1;
 	private int executeStartCycle = -1;
 	private int executeEndCycle = -1;
@@ -140,7 +140,7 @@ public class Instruction {
 		case 12:
 			return Opcode.HALT;
 		default:
-			throw new UnknownOpcodeException();
+			throw new UnknownOpcodeException(pc);
 		}
 	}
 

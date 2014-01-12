@@ -34,13 +34,13 @@ public class Tomasulo {
 	private ArrayList<Instruction> writeToCDBList;			/* All of the instructions that are ready to write to the CDB */
 
 	private Memory memory;									/* The main memory of the processor */
-	private Registers registers;							/* The processor's int & float registers */
+	private Registers registers;							/* The processor's integer & float registers */
 	private ReservationStations reservationStations;		/* The processor's reservation stations */
 	private Buffers buffers;								/* The processor's buffers */
 
 	private boolean fetchingStatus;							/* The fetching status: whether or not we should fetch */
 	private boolean globalStatus;							/* The program's status: whether it's finished or not */
-	private boolean fetchedHaltInst;						/* Whether or not a HALT instruction was fetched */
+	private boolean fetchedHaltInst;						/* Whether or not an HALT instruction was fetched */
 	private int clock;										/* The current clock cycle */
 	private int pc;											/* The current PC */
 
@@ -51,8 +51,8 @@ public class Tomasulo {
 
 	/**
 	 * Initializes the program's flow according to the configuration and memory given.
-	 * @param mem the main memory.
-	 * @param configuration the configuration of the program.
+	 * @param mem - the main memory.
+	 * @param configuration - the configuration of the program.
 	 * @throws MissingNumberOfReservationStationsException
 	 * @throws MissingNumberOfLoadStoreBuffersException
 	 */
@@ -176,7 +176,7 @@ public class Tomasulo {
 				fetchingStatus = Global.FINISHED;
 				instruction.setIssueCycle(clock);
 				instruction.setExecuteStartCycle(clock);
-				instructionsQueue.poll();
+				instructionsQueue.clear();
 			}
 		}
 
@@ -194,7 +194,7 @@ public class Tomasulo {
 			globalStatus = Global.FINISHED;
 		}
 
-//		printReservationStations();
+		//printReservationStations();
 	}
 
 	/**
@@ -232,11 +232,10 @@ public class Tomasulo {
 		if (fetchingStatus == Global.UNFINISHED && fetchedHaltInst==false) {
 			if (pc < 0 || pc > memory.getMaxWords() - 1) {
 				// We may get here as a result of invalid JUMP instruction.
-				throw new ProgramCounterOutOfBoundException();
+				throw new ProgramCounterOutOfBoundException(pc, clock);
 			}
 			if (pc == memory.getMaxWords() - 1) {
 				// We may get here if no HALT instruction was found.
-				//System.out.println("Missing Halt Operation.\nContinue Executing Legal Instructions: ");
 				fetchingStatus = Global.FINISHED;
 			} else {
 				// Legal situation - fetching an instruction from the memory:
@@ -253,11 +252,11 @@ public class Tomasulo {
 	}
 
 	/**
-	 * For JUMP / BRANCH_TAKEN instructions: empties the instructions queue.
+	 * For JUMP / BNE / BEQ instructions: empties the instructions queue.
 	 */
 	private void emptyInstructionsQueue() {
 		instructionsQueue.clear();
-		fetchedHaltInst=false;
+		fetchedHaltInst = false;
 	}
 
 	/**
@@ -265,11 +264,12 @@ public class Tomasulo {
 	 * instruction in the instruction queue each clock cycle, as long we have
 	 * instruction to fetch from the memory.
 	 * 
-	 * We will consider the following scenarios: 1. If there isn't a free
+	 * We will consider the following scenarios:
+	 * 1. If there isn't a free
 	 * appropriate reservation station, the instruction will stay in the
 	 * instructions_queue. We will peek it again in the next issue cycle, after
 	 * fetching one more instruction from the memory to the instructions queue.
-	 * This is what we call structural hazard..
+	 * This is what we call structural hazard.
 	 * 
 	 * 2. If there is a free reservation station but some of the operands are
 	 * tags, then the instruction will be added to the waiting_list & popped out
@@ -844,6 +844,9 @@ public class Tomasulo {
 	}
 
 	// Getters & Setters
+	public void terminateTomasulu(){
+		globalStatus = Global.FINISHED;
+	}
 	
 	public boolean isFinished() {
 		return globalStatus;
