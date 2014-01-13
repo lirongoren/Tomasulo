@@ -30,6 +30,7 @@ public class Main {
 			} catch (ProgramCounterOutOfBoundException | UnknownOpcodeException e) {
 				terminateProgram(e.getMessage());
 				tomasulo.terminateTomasulu();
+				return;
 			}
 			tomasulo.printRegistersValues();
 		}
