@@ -1,6 +1,5 @@
 package main;
 import java.io.IOException;
-
 import exceptions.*;
 
 public class Main {
@@ -45,7 +44,6 @@ public class Main {
 			terminateProgram("Got an IO exception, could not create output files.");
 		}
 				
-		
 	}
 	
 	public static void terminateProgram (String message){
