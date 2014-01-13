@@ -192,7 +192,8 @@ public class Tomasulo {
 		executeList.addAll(tmpExecuteList);
 		writeToCDBList.addAll(tmpWriteToCDBList);
 
-		if (waitingList.isEmpty() && instructionsQueue.isEmpty() && executeList.isEmpty() && writeToCDBList.isEmpty()) {
+		if (waitingList.isEmpty() && instructionsQueue.isEmpty() && executeList.isEmpty() && writeToCDBList.isEmpty()
+				&& fetchingStatus==Global.FINISHED) {
 			globalStatus = Global.FINISHED;
 		}
 
@@ -801,6 +802,8 @@ public class Tomasulo {
 			System.out.println(j + "\t|" + inst.getOPCODE() + "\t|" + inst.getDST() + "\t|" + inst.getSRC0() + "\t|" + inst.getSRC1() + "\t|" + inst.getIMM());
 		}
 		System.out.println("===============================================");
+		fetchingStatus = Global.UNFINISHED;
+		fetchedHaltInst = Global.UNFINISHED;
 		pc=0;
 		clock=0;
 	}
