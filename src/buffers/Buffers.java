@@ -94,15 +94,18 @@ public class Buffers {
 
 	public boolean isThereStoreAddressCollision(StoreBuffer currentBuffer) {
 		for (LoadBuffer otherBuffer : loadBuffers) {
-			if (otherBuffer.isBusy() && (otherBuffer.getAddress()==-1 || (otherBuffer.getAddress()==currentBuffer.getAddress()))){			
+			if (otherBuffer.isBusy()
+					&& (otherBuffer.getAddress()==-1 || (otherBuffer.getAddress()==currentBuffer.getAddress()))
+					&& (otherBuffer.getInst().getPc()<currentBuffer.getInst().getPc())){			
 				return true;
 			}
 		}
 		
 		for (StoreBuffer otherBuffer : storeBuffers) {
-			if (otherBuffer.isBusy() &&
-					(otherBuffer.getAddress()==-1 ||
-					(otherBuffer.getAddress()==currentBuffer.getAddress() && !otherBuffer.getNameOfStation().equals(currentBuffer.getNameOfStation())))){			
+			if (otherBuffer.isBusy() 
+					&&(otherBuffer.getAddress()==-1 ||
+					(otherBuffer.getAddress()==currentBuffer.getAddress() && !otherBuffer.getNameOfStation().equals(currentBuffer.getNameOfStation())))
+					&& (otherBuffer.getInst().getPc()<currentBuffer.getInst().getPc())){			
 				return true;
 			}
 		}
@@ -110,8 +113,10 @@ public class Buffers {
 	}
 
 	public boolean isThereLoadAddressCollision(LoadBuffer currentBuffer) {
-		for (StoreBuffer buffer : storeBuffers) {
-			if (buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==currentBuffer.getAddress())){			
+		for (StoreBuffer otherBuffer : storeBuffers) {
+			if (otherBuffer.isBusy() 
+					&& (otherBuffer.getAddress()==-1 || otherBuffer.getAddress()==currentBuffer.getAddress())
+					&& (otherBuffer.getInst().getPc()<currentBuffer.getInst().getPc())){			
 				return true;
 			}
 		}

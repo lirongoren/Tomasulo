@@ -804,6 +804,8 @@ public class Tomasulo {
 		System.out.println("===============================================");
 		fetchingStatus = Global.UNFINISHED;
 		fetchedHaltInst = Global.UNFINISHED;
+		instructionsQueue.clear();
+		instructionsStaticQueue.clear();
 		pc=0;
 		clock=0;
 	}
