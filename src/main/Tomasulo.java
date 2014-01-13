@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+
 import main.Instruction.Opcode;
 import registers.Register.Status;
 import registers.Registers;
@@ -15,6 +16,7 @@ import units.integerALU;
 import buffers.Buffers;
 import buffers.LoadBuffer;
 import buffers.StoreBuffer;
+import exceptions.AddressForLoadStoreOutOfBoundException;
 import exceptions.MissingNumberOfLoadStoreBuffersException;
 import exceptions.MissingNumberOfReservationStationsException;
 import exceptions.ProgramCounterOutOfBoundException;
@@ -156,9 +158,10 @@ public class Tomasulo {
 	 * This method triggers the Tomasulo algorithm for one clock cycle.
 	 * Runs the main stages: fetch, issue, execute, write to CDB.
 	 * @throws UnknownOpcodeException
-	 * @throws ProgramCounterOutOfBoundException
+	 * @throws AddressForLoadStoreOutOfBoundException 
+	 * @throws ProgramCounterOutOfBoundException 
 	 */
-	public void step() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
+	public void step() throws UnknownOpcodeException, AddressForLoadStoreOutOfBoundException, ProgramCounterOutOfBoundException {
 		ArrayList<Instruction> tmpExecuteList = new ArrayList<Instruction>();
 		ArrayList<Instruction> tmpWriteToCDBList = new ArrayList<Instruction>();
 		fetchInstruction();
@@ -199,16 +202,17 @@ public class Tomasulo {
 	/**
 	 * In every step of Tomasulo algorithm we call this method in order to check if
 	 * some instructions can be moved from the waiting list to the executing
-	 * list as the operands are ready in the appropriate reservation station / buffer.
+	 * list as the operands are ready in the appropriate reservation station / buffer. 
+	 * @throws AddressForLoadStoreOutOfBoundException 
 	 */
-	private void handleWaitingList() {
+	private void handleWaitingList() throws AddressForLoadStoreOutOfBoundException   {
 		ArrayList<Instruction> tmpRemovedWaitingList = new ArrayList<Instruction>();
 		for (Instruction instruction : waitingList) {
 			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
 				if (instruction.getOPCODE() == Opcode.LD) {
 					LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
 					if (load_buffer.getAddress()==-1){
-						load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
+						load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1(), pc);
 					}
 					if (!buffers.isThereLoadAddressCollision(load_buffer)){
 						executeList.add(instruction);
@@ -218,7 +222,7 @@ public class Tomasulo {
 				else if (instruction.getOPCODE() == Opcode.ST) {
 					StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
 					if (store_buffer.getAddress() == -1){
-						store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
+						store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1(), pc);
 					}
 					if (!buffers.isThereStoreAddressCollision(store_buffer)){
 						executeList.add(instruction);
@@ -244,11 +248,11 @@ public class Tomasulo {
 	 */
 	private void fetchInstruction() throws UnknownOpcodeException, ProgramCounterOutOfBoundException {
 		if (fetchingStatus == Global.UNFINISHED && fetchedHaltInst==false) {
-			if (pc < 0 || pc > memory.getMaxWords() - 1) {
+			if (pc < 0 || pc > Memory.getMaxWords() - 1) {
 				// We may get here as a result of invalid JUMP instruction.
 				throw new ProgramCounterOutOfBoundException(pc, clock);
 			}
-			if (pc == memory.getMaxWords() - 1) {
+			if (pc == Memory.getMaxWords() - 1) {
 				// We may get here if no HALT instruction was found.
 				fetchingStatus = Global.FINISHED;
 			} else {
@@ -296,9 +300,10 @@ public class Tomasulo {
 	 * @param tmpExecuteList the temporary execute list: all of the instructions
 	 * that are ready to be executed will be added to that list, and in the end of
 	 * the cycle they will be added to the executeList in order to be executed
-	 * only in the next cycle.
+	 * only in the next cycle.  
+	 * @throws AddressForLoadStoreOutOfBoundException 
 	 */
-	public void issue(ArrayList<Instruction> tmpExecuteList) {
+	public void issue(ArrayList<Instruction> tmpExecuteList) throws AddressForLoadStoreOutOfBoundException   {
 		Instruction instruction = instructionsQueue.peek();
 
 		instruction.setIssueCycle(clock);
@@ -470,10 +475,12 @@ public class Tomasulo {
 	 * @param buffer the load buffer
 	 * @param instruction the current instruction
 	 * @param tmpExecuteList the temporary execute list: if the instruction is
-	 * ready to be executed it will be added to that list and executed in the next cycle.
+	 * ready to be executed it will be added to that list and executed in the next cycle. 
+	 * @throws AddressForLoadStoreOutOfBoundException 
 	 */
-	private void setLoadBufferValues(LoadBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
+	private void setLoadBufferValues(LoadBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) throws AddressForLoadStoreOutOfBoundException   {
 		buffer.setBusy();
+		buffer.setInst(instruction);
 		buffer.setOpcode(instruction.getOPCODE());
 		instruction.setStation(buffer.getNameOfStation());
 
@@ -481,7 +488,7 @@ public class Tomasulo {
 			buffer.setValue1(registers.getIntRegisterValue(instruction.getSRC0()));
 
 			// We decided to calculate the effective address at the issue stage:
-			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
+			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1(), pc);
 				
 			if (!buffers.isThereLoadAddressCollision(buffer)) {
 				tmpExecuteList.add(instructionsQueue.poll());
@@ -506,9 +513,11 @@ public class Tomasulo {
 	 * @param instruction the current instruction
 	 * @param tmpExecuteList the temporary execute list: if the instruction is
 	 * ready to be executed it will be added to that list and executed in the next cycle.
+	 * @throws AddressForLoadStoreOutOfBoundException 
 	 */
-	private void setStoreBufferValues(StoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
+	private void setStoreBufferValues(StoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) throws AddressForLoadStoreOutOfBoundException   {
 		buffer.setBusy();
+		buffer.setInst(instruction);
 		buffer.setOpcode(instruction.getOPCODE());
 		instruction.setStation(buffer.getNameOfStation());
 
@@ -526,7 +535,7 @@ public class Tomasulo {
 		if (buffer.getFirstTag().isEmpty()) {
 
 			// We decided to calculate the effective address at the issue stage:
-			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
+			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1(), pc);
 					
 			if (buffer.getSecondTag().isEmpty()) {
 				if (!buffers.isThereStoreAddressCollision(buffer)) {

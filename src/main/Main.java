@@ -28,7 +28,7 @@ public class Main {
 			tomasulo.printRegistersValues();
 			try {
 				tomasulo.step();
-			} catch (ProgramCounterOutOfBoundException | UnknownOpcodeException e) {
+			} catch (ProgramCounterOutOfBoundException | UnknownOpcodeException | AddressForLoadStoreOutOfBoundException e) {
 				terminateProgram(e.getMessage());
 				tomasulo.terminateTomasulu();
 			}	

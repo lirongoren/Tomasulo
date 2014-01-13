@@ -1,6 +1,8 @@
 package buffers;
 import main.Instruction;
+import main.Memory;
 import reservationStations.ReservationStation;
+import exceptions.AddressForLoadStoreOutOfBoundException;
 
 public class LoadStoreBuffer extends ReservationStation {
 	
@@ -15,8 +17,11 @@ public class LoadStoreBuffer extends ReservationStation {
 		address = -1;
 	}
 	
-	public void calculateAddress(int imm, int registerValue){
+	public void calculateAddress(int imm, int registerValue, int pc) throws AddressForLoadStoreOutOfBoundException{
 		address = imm + registerValue;
+    	if (address < 0 || address > Memory.getMaxWords() - 1) {
+    		throw new AddressForLoadStoreOutOfBoundException(pc , address, inst.getOPCODE());
+    	}
 	}
 	
 	public int getAddress() {
@@ -52,6 +57,7 @@ public class LoadStoreBuffer extends ReservationStation {
 
 	public void freeBuffer() {
 		address = -1;
+		inst = null;
 		free();
 	}
 	

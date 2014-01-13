@@ -3,7 +3,7 @@ package main;
 public class Memory {
 	 
     private int[] mem;
-    private int maxWords = 1024;
+    private static int maxWords = 1024;
 	private int insertPtr = 0;
     
 	/**
@@ -16,7 +16,7 @@ public class Memory {
     /**
      * @return the max words in the memory.
      */
-    public int getMaxWords() {
+    public static int getMaxWords() {
 		return maxWords;
 	}
     
