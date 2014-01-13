@@ -17,6 +17,7 @@ import buffers.Buffers;
 import buffers.LoadBuffer;
 import buffers.StoreBuffer;
 import exceptions.AddressForLoadStoreOutOfBoundException;
+import exceptions.InvalidDelayValueForUnitsException;
 import exceptions.MissingNumberOfLoadStoreBuffersException;
 import exceptions.MissingNumberOfReservationStationsException;
 import exceptions.ProgramCounterOutOfBoundException;
@@ -56,8 +57,9 @@ public class Tomasulo {
 	 * @param configuration - the configuration of the program.
 	 * @throws MissingNumberOfReservationStationsException
 	 * @throws MissingNumberOfLoadStoreBuffersException
+	 * @throws InvalidDelayValueForUnitsException 
 	 */
-	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MissingNumberOfReservationStationsException, MissingNumberOfLoadStoreBuffersException {
+	public Tomasulo(Memory mem, Map<String, Integer> configuration) throws MissingNumberOfReservationStationsException, MissingNumberOfLoadStoreBuffersException, InvalidDelayValueForUnitsException {
 
 		instructionsQueue = new LinkedList<Instruction>();
 		instructionsStaticQueue = new LinkedList<Instruction>();
@@ -125,32 +127,22 @@ public class Tomasulo {
 
 	/**
 	 * This method creates the processor's units. In any case of invalid
-	 * input (non value / value=zero) it will create a unit with delay = 0.
+	 * input (non value / value=zero) an exception is thrown.
 	 * @param configuration the configuration of the processor.
+	 * @throws InvalidDelayValueForUnitsException 
 	 */
-	private void initializeUnits(Map<String, Integer> configuration) {
+	private void initializeUnits(Map<String, Integer> configuration) throws InvalidDelayValueForUnitsException {
 		try {
 			alu_unit = new integerALU(configuration.get("int_delay"));
-		} catch (NullPointerException e) {
-			alu_unit = new integerALU();
-		}
-
-		try {
 			FP_add_sub_unit = new FPAddSub(configuration.get("add_delay"));
-		} catch (NullPointerException e) {
-			FP_add_sub_unit = new FPAddSub();
-		}
-
-		try {
 			FP_mult_unit = new FPMul(configuration.get("mul_delay"));
+			load_store_unit = new LoadStore(configuration.get("mem_delay"));			
 		} catch (NullPointerException e) {
-			FP_mult_unit = new FPMul();
+			throw new InvalidDelayValueForUnitsException();
 		}
-
-		try {
-			load_store_unit = new LoadStore(configuration.get("mem_delay"));
-		} catch (NullPointerException e) {
-			load_store_unit = new LoadStore();
+		if (alu_unit.getDelay() == 0 || FP_add_sub_unit.getDelay() == 0 || FP_mult_unit.getDelay() == 0
+				|| load_store_unit.getDelay()==0) {
+			throw new InvalidDelayValueForUnitsException();
 		}
 	}
 

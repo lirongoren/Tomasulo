@@ -12,7 +12,8 @@ public class Main {
 		try {
 			tomasulo = new Tomasulo(parser.getMemory(), parser.getConfiguration());
 		}
-		catch (MissingNumberOfLoadStoreBuffersException | MissingNumberOfReservationStationsException  e) {
+		catch (MissingNumberOfLoadStoreBuffersException | MissingNumberOfReservationStationsException 
+				| InvalidDelayValueForUnitsException e) {
 			terminateProgram(e.getMessage());
 			return;
 		}
