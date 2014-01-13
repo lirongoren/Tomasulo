@@ -25,14 +25,13 @@ public class Main {
 		}	
 		
 		while (!tomasulo.isFinished()) {
+			tomasulo.printRegistersValues();
 			try {
 				tomasulo.step();
 			} catch (ProgramCounterOutOfBoundException | UnknownOpcodeException e) {
 				terminateProgram(e.getMessage());
 				tomasulo.terminateTomasulu();
-				return;
-			}
-			tomasulo.printRegistersValues();
+			}	
 		}
 		
 		try {
