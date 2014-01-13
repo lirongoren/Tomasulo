@@ -208,13 +208,28 @@ public class Tomasulo {
 			if (instruction.isReadyToBeExecuted(reservationStations, buffers)) {
 				if (instruction.getOPCODE() == Opcode.LD) {
 					LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
-					load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
-				} else if (instruction.getOPCODE() == Opcode.ST) {
+					if (load_buffer.getAddress()==-1){
+						load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
+					}
+					if (!buffers.isThereLoadAddressCollision(load_buffer.getAddress())){
+						executeList.add(instruction);
+						tmpRemovedWaitingList.add(instruction);
+					}
+				} 
+				else if (instruction.getOPCODE() == Opcode.ST) {
 					StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
-					store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
+					if (store_buffer.getAddress() == -1){
+						store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
+					}
+					if (!buffers.isThereStoreAddressCollision(store_buffer.getAddress())){
+						executeList.add(instruction);
+						tmpRemovedWaitingList.add(instruction);
+					}
 				}
-				executeList.add(instruction);
-				tmpRemovedWaitingList.add(instruction);
+				else{				
+					executeList.add(instruction);
+					tmpRemovedWaitingList.add(instruction);
+				}
 			}
 		}
 		if (!tmpRemovedWaitingList.isEmpty()) {
@@ -469,15 +484,17 @@ public class Tomasulo {
 
 			// We decided to calculate the effective address at the issue stage:
 			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
-			buffers.addToAddressMap(buffer, instruction);
-			
-			if (!buffers.isThereAddressCollision()) {
+				
+			if (!buffers.isThereLoadAddressCollision(buffer.getAddress())) {
 				tmpExecuteList.add(instructionsQueue.poll());
-			} else {
-				// TODO - handle collision of address in the buffers.
+			} 
+			else {
+				//last case - on tags bug collision, adding to the end of waiting list.
+				waitingList.add(instructionsQueue.poll());
 			}
 
-		} else {
+		} 
+		else {
 			buffer.setFirstTag(registers.getIntRegisterTag(instruction.getSRC0()));
 			waitingList.add(instructionsQueue.poll());
 		}
@@ -512,23 +529,23 @@ public class Tomasulo {
 
 			// We decided to calculate the effective address at the issue stage:
 			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
-			buffers.addToAddressMap(buffer, instruction);
-			
+					
 			if (buffer.getSecondTag().isEmpty()) {
-				if (!buffers.isThereAddressCollision()) {
+				if (!buffers.isThereStoreAddressCollision(buffer.getAddress())) {
 					tmpExecuteList.add(instructionsQueue.poll());
-				} else {
-					// TODO - handle collision of address in the buffers.
 				}
-
-			} else {
+				else {
+					//last case - on tags bug collision, adding to the end of waiting list.
+					waitingList.add(instructionsQueue.poll());
+				}
+			} 
+			else {
 				waitingList.add(instructionsQueue.poll());
 			}
 
 		} else {
 			waitingList.add(instructionsQueue.poll());
 		}
-
 	}
 
 	/**

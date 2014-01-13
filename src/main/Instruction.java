@@ -50,10 +50,10 @@ public class Instruction {
 	public void freeStation(ReservationStations reservationStations, Buffers buffers) {
 		switch (OPCODE) {
 		case LD:
-			buffers.getLoadBuffer(station).free();
+			buffers.getLoadBuffer(station).freeBuffer();
 			break;
 		case ST:
-			buffers.getStoreBuffer(station).free();
+			buffers.getStoreBuffer(station).freeBuffer();
 			break;
 		case ADD:
 		case ADDI:

@@ -3,25 +3,18 @@ package buffers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-
-import main.Instruction;
 
 public class Buffers {
 	
 	private Map<String, LoadStoreBuffer> buffers;
 	private List<StoreBuffer> storeBuffers;
 	private List<LoadBuffer> loadBuffers;
-	private Map<Integer, Queue<Instruction>> addressToInstructions;
 
 	public Buffers(int numStoreBuffers, int numLoadBuffers){	
 		int i;
-		buffers = new HashMap<String, LoadStoreBuffer>();
-		addressToInstructions = new HashMap<Integer, Queue<Instruction>>();
-		
+		buffers = new HashMap<String, LoadStoreBuffer>();		
 		storeBuffers = new ArrayList<StoreBuffer>();
 		for (i=0 ; i<numStoreBuffers ; i++){
 			StoreBuffer storeBuffer = new StoreBuffer(i, "STORE");
@@ -99,11 +92,30 @@ public class Buffers {
 		}
 	}
 
-	public boolean isThereAddressCollision() {
-		// TODO Auto-generated method stub
+	public boolean isThereStoreAddressCollision(int address) {
+		for (LoadBuffer buffer : loadBuffers) {
+			if (!buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==address)){			
+				return true;
+			}
+		}
+		
+		for (StoreBuffer buffer : storeBuffers) {
+			if (!buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==address)){			
+				return true;
+			}
+		}
 		return false;
 	}
 
+	public boolean isThereLoadAddressCollision(int address) {
+		for (StoreBuffer buffer : storeBuffers) {
+			if (!buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==address)){			
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public List<StoreBuffer> getStoreBuffers() {
 		return storeBuffers;
 	}
@@ -118,11 +130,5 @@ public class Buffers {
 			buffer.free();
 		}
 	}
-
-	public void addToAddressMap(LoadStoreBuffer buffer, Instruction instruction) {
-		
-		
-	}
-	
 	
 }

@@ -1,5 +1,5 @@
 package buffers;
-
+import main.Instruction;
 import reservationStations.ReservationStation;
 
 public class LoadStoreBuffer extends ReservationStation {
@@ -7,9 +7,12 @@ public class LoadStoreBuffer extends ReservationStation {
 	private int address;
 	private int value1; // for load and store instructions
 	private float value2; // for store instructions only
+	private Instruction inst;
 	
+
 	public LoadStoreBuffer(int i, String name) {
 		super(i, name);
+		address = -1;
 	}
 	
 	public void calculateAddress(int imm, int registerValue){
@@ -38,5 +41,18 @@ public class LoadStoreBuffer extends ReservationStation {
 		return value2;
 	}
 
+	
+	public Instruction getInst() {
+		return inst;
+	}
 
+	public void setInst(Instruction inst) {
+		this.inst = inst;
+	}
+
+	public void freeBuffer() {
+		address = -1;
+		free();
+	}
+	
 }
