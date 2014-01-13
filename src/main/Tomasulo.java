@@ -793,6 +793,9 @@ public class Tomasulo {
 			inst = new Instruction(binStr, j++);
 			System.out.println(j + "\t|" + inst.getOPCODE() + "\t|" + inst.getDST() + "\t|" + inst.getSRC0() + "\t|" + inst.getSRC1() + "\t|" + inst.getIMM());
 		}
+		System.out.println("===============================================");
+		pc=0;
+		clock=0;
 	}
 
 	/**

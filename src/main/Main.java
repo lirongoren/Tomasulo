@@ -1,5 +1,6 @@
 package main;
 import java.io.IOException;
+
 import exceptions.*;
 
 public class Main {
@@ -16,7 +17,13 @@ public class Main {
 			terminateProgram(e.getMessage());
 			return;
 		}
-				
+			
+		try {
+			tomasulo.printInstructions();
+		} catch (UnknownOpcodeException | ProgramCounterOutOfBoundException e) {
+			terminateProgram(e.getMessage());
+		}	
+		
 		while (!tomasulo.isFinished()) {
 			try {
 				tomasulo.step();
@@ -36,7 +43,7 @@ public class Main {
 			terminateProgram("Got an IO exception, could not create output files.");
 		}
 				
-		//tomasulo.printInstructions();	
+		
 	}
 	
 	public static void terminateProgram (String message){
