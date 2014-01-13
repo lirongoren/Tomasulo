@@ -35,10 +35,10 @@ public class Main {
 		}
 		
 		try {
-			parser.createMemoryOutputFile();
-			parser.createFloatRegistersOutputFile(tomasulo.getRegisters());
-			parser.createIntRegistersOutputFile(tomasulo.getRegisters());
-			parser.createTraceOutputFile(tomasulo.getInstructionsStaticQueue());
+			parser.createMemoryOutputFile(args[2]);
+			parser.createIntRegistersOutputFile(tomasulo.getRegisters(), args[3]);
+			parser.createFloatRegistersOutputFile(tomasulo.getRegisters(), args[4]);
+			parser.createTraceOutputFile(tomasulo.getInstructionsStaticQueue(), args[5]);
 		} catch (IOException e) {
 			terminateProgram("Got an IO exception, could not create output files.");
 		}

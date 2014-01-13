@@ -80,10 +80,11 @@ public class Parser {
 /***************************************OUTPUT FILES************************************/
 	/**
 	 * Creates the memory output file.
+	 * @param fileName 
 	 * @throws IOException
 	 */
-	public void createMemoryOutputFile() throws IOException {
-		File file = new File("memout.txt"); // TODO - create the file according to the arguments
+	public void createMemoryOutputFile(String fileName) throws IOException {
+		File file = new File(fileName); 
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		for (int i = 0; i < 1024; i++) {
 			String str = memory.loadAsHexString(i);
@@ -96,10 +97,11 @@ public class Parser {
 	/**
 	 * Creates the trace output file.
 	 * @param instructions_queue
+	 * @param fileName 
 	 * @throws IOException
 	 */
-	public void createTraceOutputFile(Queue<Instruction> instructions_queue) throws IOException {
-		File file = new File("trace.txt"); // TODO - create the file according to the arguments
+	public void createTraceOutputFile(Queue<Instruction> instructions_queue, String fileName) throws IOException {
+		File file = new File(fileName); 
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		String hexInst;
 		
@@ -125,12 +127,13 @@ public class Parser {
 	}
 
 	/**
-	 * Creates the int registers output file.
+	 * Creates the integer registers output file.
 	 * @param registers
+	 * @param fileName 
 	 * @throws IOException
 	 */
-	public void createIntRegistersOutputFile(Registers registers) throws IOException {
-		File file = new File("regint.txt"); // TODO - create the file according to the arguments
+	public void createIntRegistersOutputFile(Registers registers, String fileName) throws IOException {
+		File file = new File(fileName); 
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		registers.printIntRegisters(output);
 		output.close();
@@ -139,10 +142,11 @@ public class Parser {
 	/**
 	 * Creates the float registers output file.
 	 * @param registers
+	 * @param fileName 
 	 * @throws IOException
 	 */
-	public void createFloatRegistersOutputFile(Registers registers) throws IOException {
-		File file = new File("regout.txt"); // TODO - create the file according to the arguments
+	public void createFloatRegistersOutputFile(Registers registers, String fileName) throws IOException {
+		File file = new File(fileName); 
 		BufferedWriter output = new BufferedWriter(new FileWriter(file));
 		registers.printFloatRegisters(output);
 		output.close();
