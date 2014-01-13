@@ -194,7 +194,7 @@ public class Tomasulo {
 			globalStatus = Global.FINISHED;
 		}
 
-		//printReservationStations();
+		printReservationStations();
 	}
 
 	/**
@@ -211,7 +211,7 @@ public class Tomasulo {
 					if (load_buffer.getAddress()==-1){
 						load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1());
 					}
-					if (!buffers.isThereLoadAddressCollision(load_buffer.getAddress())){
+					if (!buffers.isThereLoadAddressCollision(load_buffer)){
 						executeList.add(instruction);
 						tmpRemovedWaitingList.add(instruction);
 					}
@@ -221,7 +221,7 @@ public class Tomasulo {
 					if (store_buffer.getAddress() == -1){
 						store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1());
 					}
-					if (!buffers.isThereStoreAddressCollision(store_buffer.getAddress())){
+					if (!buffers.isThereStoreAddressCollision(store_buffer)){
 						executeList.add(instruction);
 						tmpRemovedWaitingList.add(instruction);
 					}
@@ -343,7 +343,6 @@ public class Tomasulo {
 		else if (instruction.getOPCODE().equals(Opcode.BNE) || instruction.getOPCODE().equals(Opcode.BEQ)) {
 			branchResolution(instruction);
 		}
-
 	}
 
 	/**
@@ -474,7 +473,7 @@ public class Tomasulo {
 	 * @param tmpExecuteList the temporary execute list: if the instruction is
 	 * ready to be executed it will be added to that list and executed in the next cycle.
 	 */
-	private void setLoadBufferValues(LoadStoreBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
+	private void setLoadBufferValues(LoadBuffer buffer, Instruction instruction, ArrayList<Instruction> tmpExecuteList) {
 		buffer.setBusy();
 		buffer.setOpcode(instruction.getOPCODE());
 		instruction.setStation(buffer.getNameOfStation());
@@ -485,7 +484,7 @@ public class Tomasulo {
 			// We decided to calculate the effective address at the issue stage:
 			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
 				
-			if (!buffers.isThereLoadAddressCollision(buffer.getAddress())) {
+			if (!buffers.isThereLoadAddressCollision(buffer)) {
 				tmpExecuteList.add(instructionsQueue.poll());
 			} 
 			else {
@@ -531,7 +530,7 @@ public class Tomasulo {
 			buffer.calculateAddress(instruction.getIMM(), buffer.getValue1());
 					
 			if (buffer.getSecondTag().isEmpty()) {
-				if (!buffers.isThereStoreAddressCollision(buffer.getAddress())) {
+				if (!buffers.isThereStoreAddressCollision(buffer)) {
 					tmpExecuteList.add(instructionsQueue.poll());
 				}
 				else {
@@ -816,7 +815,6 @@ public class Tomasulo {
 	/**
 	 * Prints the reservation stations and buffers state - for DEBUG.
 	 */
-	@SuppressWarnings("unused")
 	private void printReservationStations() {
 		System.out.println("Reservation Stations: cycle" + this.clock);
 		System.out.println("Name\tOp\tVj\tVk\tQj\tQk\tA\tInstr #");

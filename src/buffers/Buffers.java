@@ -92,24 +92,26 @@ public class Buffers {
 		}
 	}
 
-	public boolean isThereStoreAddressCollision(int address) {
-		for (LoadBuffer buffer : loadBuffers) {
-			if (!buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==address)){			
+	public boolean isThereStoreAddressCollision(StoreBuffer currentBuffer) {
+		for (LoadBuffer otherBuffer : loadBuffers) {
+			if (otherBuffer.isBusy() && (otherBuffer.getAddress()==-1 || (otherBuffer.getAddress()==currentBuffer.getAddress()))){			
 				return true;
 			}
 		}
 		
-		for (StoreBuffer buffer : storeBuffers) {
-			if (!buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==address)){			
+		for (StoreBuffer otherBuffer : storeBuffers) {
+			if (otherBuffer.isBusy() &&
+					(otherBuffer.getAddress()==-1 ||
+					(otherBuffer.getAddress()==currentBuffer.getAddress() && !otherBuffer.getNameOfStation().equals(currentBuffer.getNameOfStation())))){			
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public boolean isThereLoadAddressCollision(int address) {
+	public boolean isThereLoadAddressCollision(LoadBuffer currentBuffer) {
 		for (StoreBuffer buffer : storeBuffers) {
-			if (!buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==address)){			
+			if (buffer.isBusy() && (buffer.getAddress()==-1 || buffer.getAddress()==currentBuffer.getAddress())){			
 				return true;
 			}
 		}

@@ -31,7 +31,7 @@ public class Main {
 				terminateProgram(e.getMessage());
 				tomasulo.terminateTomasulu();
 			}
-			//tomasulo.printRegistersValues();
+			tomasulo.printRegistersValues();
 		}
 		
 		try {
