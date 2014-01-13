@@ -78,8 +78,6 @@ public class Registers {
 		for (FloatRegister reg : float_registers) {
 			output.write(Float.toString(reg.getValue()));
 			output.newLine();
-			
-			
 		}
 	}
 	

@@ -34,6 +34,8 @@ public class Main {
 			}	
 		}
 		
+		//tomasulo.printRegistersValues();
+		
 		try {
 			parser.createMemoryOutputFile(args[2]);
 			parser.createIntRegistersOutputFile(tomasulo.getRegisters(), args[3]);

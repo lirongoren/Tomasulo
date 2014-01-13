@@ -213,9 +213,15 @@ public class Tomasulo {
 				if (instruction.getOPCODE() == Opcode.LD) {
 					LoadBuffer load_buffer = buffers.getLoadBuffer(instruction.getStation());
 					if (load_buffer.getAddress()==-1){
+						//We will get here in case that at the issue stage
+						//registers.getIntRegisterStatus(instruction.getSRC0()) == Status.TAG
+						//and now registers.getIntRegisterStatus(instruction.getSRC0()) == Status.VALUE
+						//and the buffer is ready to calculate the address.
 						load_buffer.calculateAddress(instruction.getIMM(), load_buffer.getValue1(), pc);
 					}
 					if (!buffers.isThereLoadAddressCollision(load_buffer)){
+						//We will get here in case there are no other store instructions in the buffers
+						//with the same address/no address and containing instruction with lower pc.
 						executeList.add(instruction);
 						tmpRemovedWaitingList.add(instruction);
 					}
@@ -223,9 +229,16 @@ public class Tomasulo {
 				else if (instruction.getOPCODE() == Opcode.ST) {
 					StoreBuffer store_buffer = buffers.getStoreBuffer(instruction.getStation());
 					if (store_buffer.getAddress() == -1){
+						//We will get here in case that at the issue stage
+						//registers.getIntRegisterStatus(instruction.getSRC0()) == Status.TAG
+						//or/and registers.getFloatRegisterStatus(instruction.getSRC1()) == Status.Tag
+						//and now there are appropriate values in the store buffer,
+						//so its ready to calculate the address.
 						store_buffer.calculateAddress(instruction.getIMM(), store_buffer.getValue1(), pc);
 					}
 					if (!buffers.isThereStoreAddressCollision(store_buffer)){
+						//We will get here in case there are no other store&load instructions in the buffers
+						//with the same address/no address and containing instruction with lower pc.
 						executeList.add(instruction);
 						tmpRemovedWaitingList.add(instruction);
 					}
@@ -257,7 +270,7 @@ public class Tomasulo {
 				// We may get here if no HALT instruction was found.
 				fetchingStatus = Global.FINISHED;
 			} else {
-				// Legal situation - fetching an instruction from the memory:
+				// Fetching an instruction from the memory:
 				Instruction inst = new Instruction(memory.loadAsBinaryString(pc), pc++);
 				if (inst.getOPCODE().equals(Opcode.HALT) ) {
 					fetchedHaltInst=true;
@@ -823,6 +836,7 @@ public class Tomasulo {
 		for (int i = 0; i < 16; i++) {
 			System.out.println("Float Register " + i + ": " + registers.getFloatRegisterValue(i));
 		}
+		System.out.println("===============================================");
 	}
 
 	/**
@@ -834,7 +848,7 @@ public class Tomasulo {
 		for (LoadBuffer buffer : buffers.getLoadBuffers()) {
 			if (buffer.isBusy()) {
 				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
-						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
+						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst().getPc());
 			} else {
 				System.out.println(buffer.getNameOfStation());
 			}
@@ -842,7 +856,7 @@ public class Tomasulo {
 		for (StoreBuffer buffer : buffers.getStoreBuffers()) {
 			if (buffer.isBusy()) {
 				System.out.println(buffer.getNameOfStation() + "\t" + buffer.getOpcode().toString() + "\t" + buffer.getValue1() + "\t" + buffer.getValue2() + "\t"
-						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst());
+						+ buffer.getFirstTag() + "\t" + buffer.getSecondTag() + "\t" + buffer.getAddress() + "\t" + buffer.getInst().getPc());
 			} else {
 				System.out.println(buffer.getNameOfStation());
 			}
@@ -871,7 +885,7 @@ public class Tomasulo {
 				System.out.println(RS.getNameOfStation());
 			}
 		}
-
+		System.out.println("===============================================");
 	}
 
 	// Getters & Setters
