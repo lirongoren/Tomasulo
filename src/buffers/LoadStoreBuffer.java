@@ -30,7 +30,7 @@ public class LoadStoreBuffer extends ReservationStation {
 	
 	public void setValue1(int value1) {
 		this.value1 = value1;
-		this.secondTag = "";
+		this.firstTag = "";
 	}
 
 	public void setValue2(float value2) {
