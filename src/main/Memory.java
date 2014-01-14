@@ -42,8 +42,8 @@ public class Memory {
      * @param pointer the location from which the data will be load.
      * @return the data from the memory.
      */
-    public int load(int pointer){
-    	return mem[pointer]; 
+    public float load(int pointer){
+    	return Float.intBitsToFloat(mem[pointer]); 
     }
     
     /**
