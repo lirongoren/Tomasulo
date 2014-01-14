@@ -347,6 +347,7 @@ public class Tomasulo {
 
 		else if (instruction.getOPCODE().equals(Opcode.JUMP)) {
 			pc = instruction.getPc() + instruction.getIMM();
+			instruction.setExecuteStartCycle(clock);
 			emptyInstructionsQueue();
 		}
 
