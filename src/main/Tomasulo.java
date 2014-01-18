@@ -189,7 +189,7 @@ public class Tomasulo {
 			globalStatus = Global.FINISHED;
 		}
 
-		printReservationStations();
+//		printReservationStations();
 	}
 
 	/**
@@ -349,6 +349,7 @@ public class Tomasulo {
 			pc = instruction.getPc() + instruction.getIMM();
 			instruction.setExecuteStartCycle(clock);
 			emptyInstructionsQueue();
+			fetchingStatus = Global.UNFINISHED;
 		}
 
 		else if (instruction.getOPCODE().equals(Opcode.BNE) || instruction.getOPCODE().equals(Opcode.BEQ)) {
